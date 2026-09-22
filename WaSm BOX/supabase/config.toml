@@ -1,0 +1,44 @@
+project_id = "wasmbot-studio"
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+[db]
+port = 54322
+major_version = 17
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+[auth]
+enabled = true
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["http://localhost:5173/reset-password"]
+[auth.email]
+enable_signup = true
+enable_confirmations = true
+[functions.studio]
+verify_jwt = false
+import_map = "./functions/deno.json"
+[functions.run-bot]
+verify_jwt = false
+import_map = "./functions/deno.json"
+static_files = ["./functions/wasm-runtime/pkg/*.wasm"]
+[functions.public-bot]
+verify_jwt = false
+import_map = "./functions/deno.json"
+static_files = ["./functions/wasm-runtime/pkg/*.wasm"]
+[functions.api-run]
+verify_jwt = false
+import_map = "./functions/deno.json"
+static_files = ["./functions/wasm-runtime/pkg/*.wasm"]
+[functions.api-keys]
+verify_jwt = false
+import_map = "./functions/deno.json"
+[functions.admin]
+verify_jwt = false
+import_map = "./functions/deno.json"
+[functions.webhooks]
+verify_jwt = false
+import_map = "./functions/deno.json"

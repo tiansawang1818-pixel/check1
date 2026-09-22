@@ -1,0 +1,2 @@
+-- Deliberately no fake users, bots, executions, or default administrator.
+-- System defaults are inserted by the migration. Create a real Auth account first.

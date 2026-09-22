@@ -1,0 +1,11 @@
+{
+  "imports": {
+    "zod": "npm:zod@3.24.2",
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2.57.4"
+  },
+  "compilerOptions": {
+    "strict": true,
+    "lib": ["deno.window", "dom", "dom.iterable"]
+  },
+  "lint": { "rules": { "exclude": ["no-explicit-any"] } }
+}

@@ -1,0 +1,57 @@
+{
+  "name": "wasmbot-studio",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --config frontend/vite.config.ts",
+    "typecheck": "tsc --noEmit && tsc -p sdk/tsconfig.json --noEmit",
+    "lint": "eslint frontend/src sdk/src supabase/functions/_shared tests && deno lint supabase/functions --ignore=supabase/functions/wasm-runtime",
+    "build": "pnpm typecheck && vite build --config frontend/vite.config.ts && pnpm build:sdk",
+    "build:sdk": "tsc -p sdk/tsconfig.json",
+    "build:wasm": "node scripts/build-wasm.mjs",
+    "test": "vitest run",
+    "test:wasm": "node scripts/test-wasm.mjs",
+    "test:integration": "deno test --config supabase/functions/deno.json --allow-env --allow-net tests/integration.test.ts",
+    "check:edge": "deno check --config supabase/functions/deno.json supabase/functions/studio/index.ts supabase/functions/run-bot/index.ts supabase/functions/public-bot/index.ts supabase/functions/api-run/index.ts supabase/functions/api-keys/index.ts supabase/functions/admin/index.ts supabase/functions/webhooks/index.ts",
+    "check:sql": "supabase db lint --local --level warning",
+    "test:sql": "node scripts/validate-sql.mjs",
+    "test:edge": "deno test --config supabase/functions/deno.json --allow-read --allow-env supabase/functions/_shared/runtime_test.ts",
+    "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm test:sql && pnpm build:wasm && pnpm test:wasm && pnpm test:edge && pnpm check:edge && pnpm build",
+    "format": "deno fmt frontend/src sdk/src tests scripts supabase/functions --ignore=supabase/functions/wasm-runtime"
+  },
+  "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
+    "@supabase/supabase-js": "^2.57.0",
+    "lucide-react": "^0.468.0",
+    "monaco-editor": "^0.52.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.1.0",
+    "recharts": "^3.1.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
+    "@eslint/js": "^9.0.0",
+    "@tailwindcss/vite": "^4.1.0",
+    "@testing-library/jest-dom": "^6.6.0",
+    "@testing-library/react": "^16.1.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "deno": "^2.9.6",
+    "eslint": "^9.0.0",
+    "jsdom": "^26.0.0",
+    "tailwindcss": "^4.1.0",
+    "typescript": "^5.7.0",
+    "typescript-eslint": "^8.0.0",
+    "vite": "^6.1.0",
+    "vitest": "^3.0.0"
+  },
+  "packageManager": "pnpm@11.19.0",
+  "workspaces": [
+    "sdk"
+  ]
+}
