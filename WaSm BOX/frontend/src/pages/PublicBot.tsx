@@ -85,7 +85,7 @@ export function PublicBot() {
           <Link className="brand" to="/">
             <Layers3 />WasmBot<span>Studio</span>
           </Link>
-          <span className="muted">Public bot</span>
+          <span className="muted">บอทสาธารณะ</span>
         </header>
       )}
       <main className="public-card">
@@ -115,7 +115,7 @@ export function PublicBot() {
               <BotForm
                 fields={bot.input_schema.fields}
                 placeholder={bot.widget.placeholder}
-                buttonText={bot.widget.buttonText || "Run bot"}
+                buttonText={bot.widget.buttonText || "เริ่มใช้งานบอท"}
                 onRun={async (input) => {
                   setResult(null);
                   setResult(await api(path, "POST", { input }, headers));
@@ -186,7 +186,7 @@ export function PublicBot() {
                         />
                       </label>
                       <button className="secondary" disabled={busy}>
-                        Submit report
+                        ส่งรายงาน
                       </button>
                     </form>
                   )}

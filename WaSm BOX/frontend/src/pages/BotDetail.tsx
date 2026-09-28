@@ -46,9 +46,9 @@ export function NewBot() {
   return (
     <>
       <Heading
-        eyebrow="BUILD SOMETHING USEFUL"
-        title="Create a bot"
-        description="Start with a grade calculator, or change the fields and rules to make it yours."
+        eyebrow="สร้างบอทได้โดยไม่ต้องเขียนโค้ด"
+        title="สร้างบอทของคุณ"
+        description="เลือกตัวอย่าง กรอกข้อมูล และตั้งเงื่อนไขง่าย ๆ แล้วไปทดลองใช้งานได้เลย"
       />
       <Builder
         steps

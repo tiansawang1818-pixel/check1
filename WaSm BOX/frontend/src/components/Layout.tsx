@@ -1,4 +1,4 @@
-import { Link, Navigate, NavLink, Outlet } from "react-router-dom";
+import { Link, Navigate, NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   Bot,
   Code2,
@@ -17,7 +17,9 @@ import { useState } from "react";
 import { useAction, useAuth } from "../lib/context";
 import { supabase } from "../lib/api";
 import { ErrorBox, Loading } from "./ui";
+import { StudioTools } from "./StudioTools";
 export function Layout() {
+  const navigate = useNavigate();
   const { session, profile, loading, error } = useAuth();
   const [open, setOpen] = useState(false);
   const { run, busy } = useAction();
@@ -27,28 +29,38 @@ export function Layout() {
     return (
       <main className="setup">
         <ErrorBox error={error || "Your account is suspended."} />
-        <button onClick={() => void supabase?.auth.signOut()}>Sign out</button>
+        <button onClick={() => void supabase?.auth.signOut()}>
+          ออกจากระบบ
+        </button>
       </main>
     );
   }
   const links = [
-    ["/dashboard", "Dashboard", LayoutDashboard],
-    ["/bots", "My bots", Bot],
-    ["/bots/new", "Create bot", Plus],
-    ["/history", "Executions", History],
-    ["/developer", "Developer", Code2],
-    ["/developer/api-keys", "API keys", KeyRound],
-    ["/profile", "Profile", User],
+    ["/dashboard", "ภาพรวม", LayoutDashboard],
+    ["/bots", "บอทของฉัน", Bot],
+    ["/bots/new", "สร้างบอท", Plus],
+    ["/history", "ประวัติการใช้งาน", History],
+    ["/developer", "คู่มือเชื่อมต่อ", Code2],
+    ["/developer/api-keys", "กุญแจ API", KeyRound],
+    ["/profile", "โปรไฟล์", User],
   ] as const;
   return (
-    <div className="app-layout">
+    <div className="app-layout user-shell">
+      <a className="skip-link" href="#main-content">ข้ามไปเนื้อหาหลัก</a>
       <button
         className="mobile-menu secondary"
-        aria-label="Toggle navigation"
+        aria-label="เปิดหรือปิดเมนู"
         onClick={() => setOpen(!open)}
       >
         {open ? <X /> : <Menu />}
       </button>
+      {open && (
+        <button
+          className="navigation-backdrop"
+          aria-label="ปิดเมนู"
+          onClick={() => setOpen(false)}
+        />
+      )}
       <aside className={`sidebar ${open ? "open" : ""}`}>
         <Link to="/dashboard" className="brand">
           <span className="brand-mark">
@@ -61,10 +73,10 @@ export function Layout() {
           </div>
           <div>
             <strong>{profile?.username || "My workspace"}</strong>
-            <small>Personal workspace</small>
+            <small>พื้นที่ทำงานส่วนตัว</small>
           </div>
         </div>
-        <div className="nav-label">WORKSPACE</div>
+        <div className="nav-label">พื้นที่ของคุณ</div>
         <nav>
           {links.map(([to, title, Icon]) => (
             <NavLink
@@ -77,11 +89,6 @@ export function Layout() {
               {title}
             </NavLink>
           ))}
-          {profile?.role === "ADMIN" && (
-            <NavLink to="/admin">
-              <Shield size={19} />Admin panel
-            </NavLink>
-          )}
         </nav>
         <div className="sidebar-bottom">
           <div className="sandbox-note">
@@ -105,12 +112,12 @@ export function Layout() {
       <div className="app-content">
         <header className="topbar">
           <span>
-            Workspace <span className="slash">/</span>{" "}
+            พื้นที่ทำงาน <span className="slash">/</span>{" "}
             <strong>WasmBot Studio</strong>
           </span>
-          <Link to="/developer" className="muted">Documentation ↗</Link>
+          <StudioTools onNavigate={navigate}/>
         </header>
-        <main className="main">
+        <main className="main" id="main-content">
           <Outlet />
         </main>
         <footer className="app-footer">

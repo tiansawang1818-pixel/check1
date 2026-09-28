@@ -13,12 +13,12 @@ export function AuthPage() {
     [username, setUsername] = useState(""),
     [message, setMessage] = useState("");
   const title = mode === "/register"
-    ? "Create your workspace"
+    ? "สร้างพื้นที่ของคุณ"
     : mode === "/forgot-password"
-    ? "Reset your password"
+    ? "ขอลิงก์ตั้งรหัสผ่านใหม่"
     : mode === "/reset-password"
-    ? "Choose a new password"
-    : "Welcome back";
+    ? "ตั้งรหัสผ่านใหม่"
+    : "ยินดีต้อนรับกลับมา";
   return (
     <div className="auth-layout">
       <aside className="auth-art">
@@ -26,13 +26,12 @@ export function AuthPage() {
           <Layers3 />WasmBot<span>Studio</span>
         </Link>
         <div>
-          <div className="eyebrow">YOUR LOGIC. EVERYWHERE.</div>
+          <div className="eyebrow">เปลี่ยนไอเดียให้ทำงานแทนคุณ</div>
           <h1>
-            One bot.<br />Every possibility.
+            กฎของคุณ<br />ความเป็นไปได้ไม่สิ้นสุด
           </h1>
           <p>
-            Build your business rules once. Put them to work across your
-            products.
+            สร้างบอทจากเงื่อนไขที่คุณรู้จัก แล้วให้บอทช่วยจัดการงานซ้ำ ๆ บนเว็บหรือแอปของคุณ
           </p>
           <div className="flow-visual">
             <span>Input</span>
@@ -43,7 +42,7 @@ export function AuthPage() {
           </div>
         </div>
         <div className="auth-foot">
-          <ShieldCheck size={18} /> Isolated execution. Versioned releases.
+          <ShieldCheck size={18} /> ทดสอบก่อนเผยแพร่ เก็บทุกเวอร์ชันไว้ตรวจสอบ
         </div>
       </aside>
       <main className="auth-main">
@@ -52,8 +51,8 @@ export function AuthPage() {
           <h1>{title}</h1>
           <p className="muted">
             {mode === "/login"
-              ? "Sign in to manage your bots and deployments."
-              : "Your workspace for reusable business logic."}
+              ? "เข้าสู่ระบบเพื่อสร้างและดูแลบอทของคุณ"
+              : "เริ่มต้นได้ด้วยการเลือกข้อมูลและตั้งเงื่อนไข ไม่ต้องเขียนโค้ด"}
           </p>
           {message && <div className="notice" role="status">{message}</div>}
           <form
@@ -72,7 +71,7 @@ export function AuthPage() {
                   });
                   if (error) throw error;
                   setMessage(
-                    "Check your email to confirm your account, then sign in.",
+                    "ตรวจอีเมลเพื่อยืนยันบัญชี แล้วกลับมาเข้าสู่ระบบ",
                   );
                 } else if (mode === "/forgot-password") {
                   const { error } = await supabase.auth.resetPasswordForEmail(
@@ -81,7 +80,7 @@ export function AuthPage() {
                   );
                   if (error) throw error;
                   setMessage(
-                    "If an account exists, a password reset link has been sent.",
+                    "หากมีบัญชีนี้ในระบบ เราจะส่งลิงก์ตั้งรหัสผ่านใหม่ให้ทางอีเมล",
                   );
                 } else if (mode === "/reset-password") {
                   const { error } = await supabase.auth.updateUser({
@@ -104,7 +103,7 @@ export function AuthPage() {
           >
             {mode === "/register" && (
               <label>
-                Name<input
+                ชื่อที่แสดง<input
                   required
                   maxLength={100}
                   autoComplete="nickname"
@@ -115,7 +114,7 @@ export function AuthPage() {
             )}
             {mode !== "/reset-password" && (
               <label>
-                Email<input
+                อีเมล<input
                   type="email"
                   required
                   autoComplete="email"
@@ -126,7 +125,7 @@ export function AuthPage() {
             )}
             {mode !== "/forgot-password" && (
               <label>
-                Password<input
+                รหัสผ่าน<input
                   type="password"
                   minLength={8}
                   required
@@ -140,14 +139,14 @@ export function AuthPage() {
             )}
             <button className="primary full" disabled={busy}>
               {busy
-                ? "Please wait…"
+                ? "กำลังดำเนินการ…"
                 : mode === "/login"
-                ? "Sign in"
+                ? "เข้าสู่ระบบ"
                 : mode === "/register"
-                ? "Create account"
+                ? "สร้างบัญชี"
                 : mode === "/forgot-password"
-                ? "Send reset link"
-                : "Update password"}
+                ? "ส่งลิงก์ทางอีเมล"
+                : "บันทึกรหัสผ่านใหม่"}
               <ArrowRight size={17} />
             </button>
           </form>
@@ -155,13 +154,13 @@ export function AuthPage() {
             {mode === "/login"
               ? (
                 <>
-                  <Link to="/forgot-password">Forgot password?</Link>
+                  <Link to="/forgot-password">ลืมรหัสผ่าน?</Link>
                   <span>
-                    New here? <Link to="/register">Create an account</Link>
+                    ยังไม่มีบัญชี? <Link to="/register">สมัครสมาชิก</Link>
                   </span>
                 </>
               )
-              : <Link to="/login">Back to sign in</Link>}
+              : <Link to="/login">กลับไปเข้าสู่ระบบ</Link>}
           </div>
         </div>
       </main>

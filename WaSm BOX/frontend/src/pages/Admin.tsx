@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, Navigate, NavLink, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, Navigate, useParams } from "react-router-dom";
 import { useAction, useAuth, useResource } from "../lib/context";
 import { api } from "../lib/api";
 import { SettingsSchema } from "../../../supabase/functions/_shared/schema";
@@ -21,6 +21,7 @@ export function Admin() {
   const { profile } = useAuth();
   const { section = "dashboard", id } = useParams();
   const [page, setPage] = useState(0);
+  useEffect(() => setPage(0), [section, id]);
   const resource = useResource(
     profile?.role === "ADMIN"
       ? `admin?resource=${section}&page=${page}${id ? `&id=${id}` : ""}`
@@ -108,33 +109,18 @@ export function Admin() {
   return (
     <>
       <Heading
-        eyebrow="ADMINISTRATION"
-        title={section === "dashboard"
-          ? "Platform overview"
-          : `Manage ${section}`}
-        description="System-wide controls. Every administrative change is audited."
+        eyebrow="ผู้ดูแลระบบ"
+        title={section === "dashboard" ? "ภาพรวมระบบ" : ({
+          users: "จัดการผู้ใช้",
+          bots: "จัดการบอท",
+          executions: "ประวัติการทำงาน",
+          reports: "รายงานปัญหา",
+          monitoring: "ติดตามระบบ",
+          logs: "บันทึกผู้ดูแล",
+          settings: "ตั้งค่าระบบ",
+        }[section] || section)}
+        description="จัดการการใช้งานทั้งระบบ พร้อมประวัติการเปลี่ยนแปลงที่ตรวจสอบได้"
       />
-      <nav className="tabs">
-        {[
-          "dashboard",
-          "users",
-          "bots",
-          "executions",
-          "reports",
-          "monitoring",
-          "logs",
-          "settings",
-        ].map((s) => (
-          <NavLink
-            key={s}
-            to={`/admin/${s}`}
-            className={s === section ? "active" : ""}
-            onClick={() => setPage(0)}
-          >
-            {s[0].toUpperCase() + s.slice(1)}
-          </NavLink>
-        ))}
-      </nav>
       {loading
         ? <Loading />
         : error

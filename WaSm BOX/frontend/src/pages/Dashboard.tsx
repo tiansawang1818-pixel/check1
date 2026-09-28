@@ -1,3 +1,4 @@
+import { GettingStarted, StudioWelcome } from "../components/StudioWelcome";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -36,14 +37,14 @@ export function UsageChart({ daily }: { daily: any[] }) {
   return (
     <>
       <div className="chart-toolbar">
-        <span className="muted">Executions per day</span>
+        <span className="muted">จำนวนการใช้งานต่อวัน</span>
         <select
-          aria-label="Chart range"
+          aria-label="ช่วงเวลาของกราฟ"
           value={range}
           onChange={(e) => setRange(Number(e.target.value))}
         >
-          <option value={7}>Last 7 days</option>
-          <option value={30}>Last 30 days</option>
+          <option value={7}>7 วันล่าสุด</option>
+          <option value={30}>30 วันล่าสุด</option>
         </select>
       </div>
       <div className="chart">
@@ -105,23 +106,21 @@ export function BotCard({ bot }: { bot: Bot & { bot_deployments?: any[] } }) {
         <h3>{bot.name}</h3>
       </Link>
       <p className="muted description">
-        {bot.description || "No description yet."}
+        {bot.description || "ยังไม่ได้เพิ่มคำอธิบาย"}
       </p>
       <div className="bot-metadata">
         <span>
           <Activity size={14} />
-          {Number(bot.run_count).toLocaleString()} runs
+          {Number(bot.run_count).toLocaleString()} ครั้ง
         </span>
         <span>
-          {bot.is_published
-            ? `Published · v${version || "—"}`
-            : "Not published"}
+          {bot.is_published ? `เผยแพร่แล้ว · v${version || "—"}` : "ยังไม่เผยแพร่"}
         </span>
       </div>
       <div className="bot-card-footer">
         <span>{bot.category}</span>
         <Link to={`/bots/${bot.id}`}>
-          Open bot <ArrowUpRight size={16} />
+          เปิดบอท <ArrowUpRight size={16} />
         </Link>
       </div>
     </article>
@@ -148,52 +147,67 @@ export function Dashboard() {
   const t = analytics.data.analytics.totals;
   return (
     <>
-      <Heading
-        eyebrow="WORKSPACE OVERVIEW"
-        title={`Welcome back${
-          profile?.username ? `, ${profile.username}` : ""
-        }`}
-        description="Your business logic, at a glance."
-      >
-        <Link className="primary" to="/bots/new">
-          <Plus size={18} />Create bot
-        </Link>
-      </Heading>
+      <StudioWelcome
+        name={profile?.username}
+        action={
+          <Link className="primary" to="/bots/new">
+            <Plus size={18} />สร้างบอทของฉัน<ArrowUpRight size={17} />
+          </Link>
+        }
+      />
+      <div className="section-heading">
+        <div>
+          <span className="section-overline">ภาพรวมพื้นที่ทำงาน</span>
+          <h2>ทุกความเคลื่อนไหว ในที่เดียว</h2>
+        </div>
+        <span className="live-data-label">ข้อมูลจากการใช้งานจริง</span>
+      </div>
       <div className="metrics">
         <Metric
-          label="My bots"
+          label="บอทของฉัน"
           value={analytics.data.analytics.botCounts.total}
-          note={`${analytics.data.analytics.botCounts.published} published`}
+          note={`${analytics.data.analytics.botCounts.published} เผยแพร่แล้ว`}
         />
         <Metric
-          label="Total executions"
+          label="จำนวนการใช้งาน"
           value={Number(t.total).toLocaleString()}
-          note={`${t.today} today`}
+          note={`${t.today} ครั้งวันนี้`}
         />
         <Metric
-          label="Success rate"
+          label="อัตราสำเร็จ"
           value={t.total ? `${(100 * t.success / t.total).toFixed(1)}%` : "—"}
-          note={`${t.success} successful · ${t.failed} failed`}
+          note={`${t.success} สำเร็จ · ${t.failed} ไม่สำเร็จ`}
         />
         <Metric
-          label="API requests"
+          label="การเรียกผ่าน API"
           value={Number(t.api).toLocaleString()}
-          note="Across your bots"
+          note="รวมทุกบอทของคุณ"
         />
       </div>
-      <Panel
-        title="Execution activity"
-        action={
-          <span className="legend">
-            <i /> All bots
-          </span>
-        }
-      >
-        <UsageChart daily={analytics.data.analytics.daily} />
-      </Panel>
+      <div className="dashboard-workspace-grid">
+        <div>
+          <Panel
+            title="แนวโน้มการใช้งาน"
+            action={
+              <span className="legend">
+                <i /> บอททั้งหมด
+              </span>
+            }
+          >
+            <UsageChart daily={analytics.data.analytics.daily} />
+          </Panel>
+        </div>
+        <GettingStarted
+          action={
+            <Link to="/bots/new" className="text-link">
+              เริ่มสร้างบอท <ArrowUpRight size={16} />
+            </Link>
+          }
+        />
+      </div>
       <div className="section-heading">
-        <h2>Your bots</h2>
-        <MoreLink to="/bots">View all bots</MoreLink>
+        <h2>บอทของคุณ</h2>
+        <MoreLink to="/bots">ดูบอททั้งหมด</MoreLink>
       </div>
       {bots.data.bots.length
         ? (
@@ -205,31 +219,31 @@ export function Dashboard() {
         )
         : (
           <Panel>
-            <Empty title="Your first bot starts here">
-              <p>Turn a business rule into a reusable service.</p>
+            <Empty title="พื้นที่นี้รอบอทตัวแรกของคุณ">
+              <p>เริ่มจากเรื่องใกล้ตัว แล้วให้บอทช่วยตอบตามเงื่อนไข</p>
               <Link to="/bots/new" className="primary">
-                <Plus size={16} />Create your first bot
+                <Plus size={16} />สร้างบอทตัวแรก
               </Link>
             </Empty>
           </Panel>
         )}
       <Panel
-        title="Recent executions"
-        action={<MoreLink to="/history">View history</MoreLink>}
+        title="การใช้งานล่าสุด"
+        action={<MoreLink to="/history">ดูประวัติทั้งหมด</MoreLink>}
       >
         <ExecutionTable rows={history.data.executions.slice(0, 5)} />
       </Panel>
       <div className="tip-strip">
         <Box />
         <div>
-          <strong>Build once. Connect everywhere.</strong>
+          <strong>สร้างครั้งเดียว ใช้งานได้หลายช่องทาง</strong>
           <p>
             Publish your bot to get a public page, API endpoint, and embeddable
             widget.
           </p>
         </div>
         <Link to="/developer">
-          Read the guide <ArrowUpRight size={16} />
+          อ่านคู่มือ <ArrowUpRight size={16} />
         </Link>
       </div>
     </>
@@ -241,19 +255,19 @@ export function Bots() {
   return (
     <>
       <Heading
-        eyebrow="YOUR WORKSPACE"
-        title="My bots"
-        description="Create, test, and manage your reusable business logic."
+        eyebrow="ผู้ช่วยที่คุณสร้างเอง"
+        title="บอทของฉัน"
+        description="ดูแลทุกบอท ตั้งแต่ไอเดียแรกไปจนถึงเวอร์ชันที่พร้อมใช้งาน"
       >
         <Link className="primary" to="/bots/new">
-          <Plus size={18} />Create bot
+          <Plus size={18} />สร้างบอท
         </Link>
       </Heading>
       <div className="search">
         <Search size={18} />
         <input
-          aria-label="Search bots on this page"
-          placeholder="Search bots on this page…"
+          aria-label="ค้นหาบอทในหน้านี้"
+          placeholder="ค้นหาบอทในหน้านี้…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -267,14 +281,29 @@ export function Bots() {
             {data.bots.length
               ? (
                 <div className="bot-grid">
+                  {search &&
+                    !data.bots.some((b: Bot) =>
+                      b.name.toLowerCase().includes(search.toLowerCase())
+                    ) && (
+                    <Empty title="ไม่พบบอทที่ตรงกับคำค้น">
+                      <button
+                        className="secondary"
+                        onClick={() => setSearch("")}
+                      >
+                        ล้างคำค้น
+                      </button>
+                    </Empty>
+                  )}
                   {data.bots.filter((b: Bot) =>
                     b.name.toLowerCase().includes(search.toLowerCase())
                   ).map((b: Bot) => <BotCard key={b.id} bot={b} />)}
                 </div>
               )
               : (
-                <Empty title="No bots yet">
-                  <Link className="primary" to="/bots/new">Create a bot</Link>
+                <Empty title="ยังไม่มีบอทในพื้นที่นี้">
+                  <Link className="primary" to="/bots/new">
+                    สร้างบอทแรกของคุณ
+                  </Link>
                 </Empty>
               )}
             <Pagination
@@ -292,8 +321,8 @@ export function ExecutionTable(
 ) {
   if (!rows.length) {
     return (
-      <Empty title="No executions yet">
-        <p>Run a bot to see its results here.</p>
+      <Empty title="ยังไม่มีประวัติการใช้งาน">
+        <p>เมื่อทดลองหรือมีคนใช้งานบอท ผลลัพธ์จะแสดงที่นี่</p>
       </Empty>
     );
   }
@@ -302,11 +331,11 @@ export function ExecutionTable(
       <table>
         <thead>
           <tr>
-            <th>Bot / request</th>
-            <th>Source</th>
-            <th>Status</th>
-            <th>Duration</th>
-            <th>Time</th>
+            <th>บอท / คำขอ</th>
+            <th>ช่องทาง</th>
+            <th>สถานะ</th>
+            <th>ระยะเวลา</th>
+            <th>วันและเวลา</th>
           </tr>
         </thead>
         <tbody>

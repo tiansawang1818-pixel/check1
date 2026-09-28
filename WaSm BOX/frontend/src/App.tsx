@@ -1,5 +1,11 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { Component, type ErrorInfo, type ReactNode } from "react";
+import {
+  Component,
+  type ErrorInfo,
+  lazy,
+  type ReactNode,
+  Suspense,
+} from "react";
 import { configured } from "./lib/api";
 import { AuthProvider, ToastProvider } from "./lib/context";
 import { AuthPage, Setup } from "./pages/Auth";
@@ -9,7 +15,10 @@ import { BotDetail, NewBot } from "./pages/BotDetail";
 import { ExecutionDetail, History } from "./pages/History";
 import { ApiKeys, Developer, Profile } from "./pages/Developer";
 import { PublicBot } from "./pages/PublicBot";
-import { Admin } from "./pages/Admin";
+import { AdminLayout } from "./components/AdminLayout";
+const Admin = lazy(() =>
+  import("./pages/Admin").then((module) => ({ default: module.Admin }))
+);
 class ErrorBoundary
   extends Component<{ children: ReactNode }, { error: boolean }> {
   state = { error: false };
@@ -69,9 +78,32 @@ export default function App() {
                     element={<Navigate to="/developer/api-keys" replace />}
                   />
                   <Route path="/profile" element={<Profile />} />
-                  <Route path="/admin" element={<Admin />} />
-                  <Route path="/admin/:section" element={<Admin />} />
-                  <Route path="/admin/:section/:id" element={<Admin />} />
+                </Route>
+                <Route element={<AdminLayout />}>
+                  <Route
+                    path="/admin"
+                    element={
+                      <Suspense fallback={<p>กำลังเปิดหน้าผู้ดูแล…</p>}>
+                        <Admin />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="/admin/:section"
+                    element={
+                      <Suspense fallback={<p>กำลังเปิดหน้าผู้ดูแล…</p>}>
+                        <Admin />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="/admin/:section/:id"
+                    element={
+                      <Suspense fallback={<p>กำลังเปิดหน้าผู้ดูแล…</p>}>
+                        <Admin />
+                      </Suspense>
+                    }
+                  />
                 </Route>
                 <Route
                   path="*"

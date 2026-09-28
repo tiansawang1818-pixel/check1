@@ -24,14 +24,26 @@ export function Heading(
 export function Badge({ children }: { children: ReactNode }) {
   return (
     <span className={`badge ${String(children).toLowerCase()}`}>
-      {String(children).replaceAll("_", " ")}
+      {({
+        ACTIVE: "พร้อมใช้งาน",
+        DRAFT: "ฉบับร่าง",
+        DISABLED: "ปิดใช้งาน",
+        BLOCKED: "ถูกระงับ",
+        SUCCESS: "สำเร็จ",
+        RUNTIME_ERROR: "ทำงานไม่สำเร็จ",
+        VALIDATION_ERROR: "ข้อมูลไม่ถูกต้อง",
+        RATE_LIMITED: "ใช้งานเกินกำหนด",
+        TIMEOUT: "หมดเวลา",
+        PENDING: "รอตรวจสอบ",
+      } as Record<string, string>)[String(children)] ||
+        String(children).replaceAll("_", " ")}
     </span>
   );
 }
 export function Loading() {
   return (
     <div className="empty" role="status">
-      <LoaderCircle className="spin" />Loading…
+      <LoaderCircle className="spin" />กำลังโหลดข้อมูล…
     </div>
   );
 }
@@ -43,7 +55,7 @@ export function ErrorBox(
       <p>{error}</p>
       {retry && (
         <button className="secondary" onClick={retry}>
-          Try again
+          ลองอีกครั้ง
         </button>
       )}
     </div>
