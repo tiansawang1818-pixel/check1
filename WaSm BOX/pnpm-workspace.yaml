@@ -1,4 +1,5 @@
 packages:
   - sdk
 allowBuilds:
+  deno: true
   esbuild: true
