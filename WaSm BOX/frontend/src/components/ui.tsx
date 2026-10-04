@@ -1,5 +1,5 @@
 import { type ReactNode, useState } from "react";
-import { ArrowUpRight, Check, Copy, Inbox, LoaderCircle } from "lucide-react";
+import { ArrowUpRight, Check, Copy, Inbox } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "../lib/context";
 export function Heading(
@@ -43,7 +43,7 @@ export function Badge({ children }: { children: ReactNode }) {
 export function Loading() {
   return (
     <div className="empty" role="status">
-      <LoaderCircle className="spin" />กำลังโหลดข้อมูล…
+      <span className="runtime-loader" aria-hidden="true"><i /><i /><i /></span>กำลังโหลดข้อมูล…
     </div>
   );
 }

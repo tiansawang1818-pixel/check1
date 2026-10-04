@@ -10,7 +10,7 @@ const destinations = [
   { path: "/profile", name: "โปรไฟล์", hint: "จัดการข้อมูลบัญชีของคุณ" },
 ];
 function preference(key: string) {
-  try { return localStorage.getItem(`wasmbot-ui-${key}`) === "true"; } catch { return false; }
+  try { return (localStorage.getItem(`wasmbot-ui-${key}`) ?? (key === "dark" ? "true" : "false")) === "true"; } catch { return false; }
 }
 export function StudioTools({ onNavigate, preview = false }: { onNavigate: (path: string) => void; preview?: boolean }) {
   const [dark, setDark] = useState(() => preference("dark"));

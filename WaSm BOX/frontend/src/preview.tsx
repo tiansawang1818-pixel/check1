@@ -15,6 +15,8 @@ import { Builder } from "./components/Builder";
 import { Badge, Heading, Metric, Panel } from "./components/ui";
 import { ToastProvider, useToast } from "./lib/context";
 import "./styles.css";
+import "./color-explosion.css";
+import { ColorExperience } from "./components/ColorExperience";
 import { StudioTools } from "./components/StudioTools";
 import { GettingStarted, StudioWelcome } from "./components/StudioWelcome";
 
@@ -197,12 +199,12 @@ function Preview() {
                           placeItems: "center",
                           borderRadius: 12,
                           background:
-                            "repeating-linear-gradient(0deg,#fff,#fff 39px,#edf0f6 40px)",
+                            "repeating-linear-gradient(0deg,var(--surface),var(--surface) 39px,var(--line) 40px)",
                         }}
                       >
                         <div
                           style={{
-                            background: "white",
+                            background: "var(--surface)",
                             padding: 20,
                             textAlign: "center",
                           }}
@@ -308,7 +310,7 @@ function Preview() {
                             style={{
                               height: 140,
                               background:
-                                "linear-gradient(180deg,#eeedff,#fff)",
+                                "linear-gradient(180deg,#7c3aed24,transparent)",
                               borderRadius: 12,
                             }}
                           />
@@ -420,7 +422,7 @@ function Preview() {
 const previewRoot = createRoot(document.getElementById("root")!);
 previewRoot.render(
   <ToastProvider>
-    <Preview />
+    <ColorExperience /><Preview />
   </ToastProvider>,
 );
 if (import.meta.hot) import.meta.hot.dispose(() => previewRoot.unmount());

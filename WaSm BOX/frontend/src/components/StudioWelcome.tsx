@@ -7,13 +7,16 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
+import { ColorPlayground } from "./ColorPlayground";
 
 export function StudioWelcome(
   { name, action }: { name?: string; action: ReactNode },
 ) {
   const [activeStage, setActiveStage] = useState(0);
   return (
+    <>
     <section className="studio-hero" aria-label="เริ่มต้นใช้งานบอท">
+      <div className="hero-art" aria-hidden="true"><div className="hero-perspective-grid" /><div className="hero-aurora" /><div className="orb-satellites">{Array.from({length: 8}, (_, i) => <i key={i} style={{"--satellite": i} as import("react").CSSProperties} />)}</div><span className="floating-token token-one">IF → THEN</span><span className="floating-token token-two">✦ YOUR RULES</span><div className="color-orb" /><div className="orb-ring" /><span className="art-star star-one">✳</span><span className="art-star star-two">✦</span><span className="art-coordinate">01 / CREATIVE AUTOMATION</span></div>
       <div className="studio-hero-copy">
         <span className="hero-eyebrow">
           <span />พื้นที่ของไอเดียที่ทำงานได้จริง
@@ -22,8 +25,9 @@ export function StudioWelcome(
           {name ? `สวัสดี ${name}` : "ยินดีต้อนรับสู่ WasmBot Studio"}
         </p>
         <h1>
-          งานซ้ำ ๆ ลดลง<br />
-          <em>เวลาให้ไอเดีย เพิ่มขึ้น</em>
+          <span className="hero-line">ไอเดียคุณ</span>
+          <em className="hero-line">เป็นไปได้<span className="title-spark">✦</span></em>
+          <span className="hero-line hero-outline">ให้บอทช่วยทำ.</span>
         </h1>
         <p className="hero-description">
           เปลี่ยนเงื่อนไขในชีวิตประจำวันให้เป็นบอท<br className="desktop-break" />{" "}
@@ -40,10 +44,11 @@ export function StudioWelcome(
         className="hero-workflow"
         aria-label="ขั้นตอนการทำงาน: รับข้อมูล ตรวจเงื่อนไข ส่งคำตอบ"
       >
+        <div className="workflow-sticker" aria-hidden="true">LESS WORK<br />MORE PLAY ↗</div>
         <div className="workflow-caption">
           <Sparkles size={14} />จากกฎเล็ก ๆ สู่ผู้ช่วยของคุณ
         </div>
-        <div className="workflow-node">
+        <div className={`workflow-node ${activeStage === 0 ? "stage-spotlight" : ""}`}>
           <span className="workflow-node-icon">
             <Layers3 size={20} />
           </span>
@@ -54,7 +59,7 @@ export function StudioWelcome(
           <span className="node-dot" />
         </div>
         <ArrowDown className="workflow-arrow" size={20} />
-        <div className="workflow-node workflow-engine">
+        <div className={`workflow-node workflow-engine ${activeStage === 1 ? "stage-spotlight" : ""}`}>
           <span className="workflow-node-icon">
             <Bot size={22} />
           </span>
@@ -65,7 +70,7 @@ export function StudioWelcome(
           <span className="engine-tag">WASM</span>
         </div>
         <ArrowDown className="workflow-arrow" size={20} />
-        <div className="workflow-node">
+        <div className={`workflow-node ${activeStage === 2 ? "stage-spotlight" : ""}`}>
           <span className="workflow-node-icon result-icon">
             <Check size={20} />
           </span>
@@ -77,7 +82,10 @@ export function StudioWelcome(
         </div>
         <div className="workflow-explorer" aria-label="เรียนรู้ขั้นตอนการทำงาน"><div className="workflow-tabs">{["รับข้อมูล", "ตรวจเงื่อนไข", "ส่งคำตอบ"].map((label, index) => <button key={label} aria-pressed={activeStage === index} onClick={() => setActiveStage(index)}>{String(index + 1).padStart(2,"0")} · {label}</button>)}</div><p aria-live="polite">{["คุณกำหนดได้ว่าจะให้กรอกอะไร เช่น ยอดสั่งซื้อหรือจังหวัด", "บอทตรวจตามลำดับ และเลือกคำตอบของข้อแรกที่ตรง", "นำคำตอบไปใช้ได้ผ่านลิงก์สาธารณะ เว็บไซต์ หรือ API"][activeStage]}</p></div>
       </div>
+      <div className="hero-marquee" aria-hidden="true"><div>{[0, 1].map(n => <span key={n}>ไอเดีย ✦ สร้างบอท ✦ ทดลอง ✦ แชร์ให้โลก ✦ CREATE ✦ BUILD ✦ PLAY ✦ </span>)}</div></div>
     </section>
+    <ColorPlayground />
+    </>
   );
 }
 export function GettingStarted({ action }: { action: ReactNode }) {
