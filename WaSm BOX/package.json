@@ -17,8 +17,10 @@
     "check:sql": "supabase db lint --local --level warning",
     "test:sql": "node scripts/validate-sql.mjs",
     "test:edge": "deno test --config supabase/functions/deno.json --allow-read --allow-env supabase/functions/_shared/runtime_test.ts",
-    "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm test:sql && pnpm build:wasm && pnpm test:wasm && pnpm test:edge && pnpm check:edge && pnpm build",
-    "format": "deno fmt frontend/src sdk/src tests scripts supabase/functions --ignore=supabase/functions/wasm-runtime"
+    "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm test:preflight && pnpm test:sql && pnpm build:wasm && pnpm test:wasm && pnpm test:edge && pnpm check:edge && pnpm build",
+    "format": "deno fmt frontend/src sdk/src tests scripts supabase/functions --ignore=supabase/functions/wasm-runtime",
+    "preflight": "node scripts/preflight.mjs",
+    "test:preflight": "node --test scripts/preflight.test.mjs"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",

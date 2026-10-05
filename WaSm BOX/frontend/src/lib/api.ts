@@ -1,3 +1,4 @@
+import { requestJson } from "./transport";
 import { createClient } from "@supabase/supabase-js";
 export const configured = Boolean(
   import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY,
@@ -18,12 +19,14 @@ export async function api<T = any>(
   method = "GET",
   data?: unknown,
   extraHeaders?: Record<string, string>,
+  options?: { signal?: AbortSignal; timeoutMs?: number },
 ): Promise<T> {
   if (!supabase) {
-    throw new Error("Configure Supabase before using the application.");
+    throw new Error("กรุณาตั้งค่า Supabase ก่อนใช้งานระบบ");
   }
-  const { data: { session } } = await supabase.auth.getSession();
-  const response = await fetch(`${apiUrl}/${path}`, {
+  const { data: { session }, error } = await supabase.auth.getSession();
+  if (error) throw new Error("ไม่สามารถตรวจสอบบัญชีได้ กรุณาเข้าสู่ระบบอีกครั้ง");
+  return requestJson<T>(`${apiUrl}/${path}`, {
     method,
     headers: {
       apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
@@ -32,12 +35,5 @@ export async function api<T = any>(
       ...extraHeaders,
     },
     body: data === undefined ? undefined : JSON.stringify(data),
-  });
-  const result = await response.json();
-  if (!response.ok || !result.success) {
-    throw new Error(
-      result.error?.message || `Request failed (${response.status})`,
-    );
-  }
-  return result;
+  }, options);
 }

@@ -2,7 +2,7 @@
 
 แพลตฟอร์มสร้าง Business Logic Bot ด้วย React + Supabase Auth/PostgreSQL/Edge Functions และ **Rust WebAssembly จริง** ไม่มี Node backend server, Railway, Render หรือ VPS เป็นส่วนประกอบของระบบ
 
-> สถานะ: เขียนระบบและสร้าง production artifacts แล้ว ตรวจสอบในเครื่องได้โดยไม่ต้องใช้ข้อมูลจำลองในแอป แต่ยัง **ไม่ได้ deploy หรือทดสอบ end-to-end กับ Supabase hosted project** เพราะยังไม่มีโปรเจกต์/credentials ตามที่ผู้ใช้แจ้ง ดูผลที่รันจริงใน [VERIFICATION.md](VERIFICATION.md)
+> สถานะ: มีการสร้าง Supabase project และตั้งค่าบัญชีแล้ว และผ่าน hosted integration 13 ขั้นตอนแล้ว แต่ยังไม่ได้ตรวจอีเมลสมัครสมาชิกและการใช้งานผ่านเบราว์เซอร์ครบทุกขั้นตอน ตรวจสถานะล่าสุดใน [DEVELOPMENT_STATUS.md](DEVELOPMENT_STATUS.md) และผลแยกตามวันที่ใน [VERIFICATION.md](VERIFICATION.md)
 
 ## Features
 
@@ -363,7 +363,7 @@ Without credentials the test is explicitly **ignored**, not counted as a passing
 
 ## Known limitations
 
-1. No Supabase project or hosting credentials were provided. Remote migrations, Auth emails, Edge deployment and the live acceptance flow are not executed in this workspace.
+1. The owner created a Supabase project and configured an admin account. All seven Edge Functions are deployed and hosted API integration passed 13 steps. Public signup email, browser acceptance and webhook delivery still need verification.
 2. Local runtime tests use Deno; Supabase hosted Edge runtime/packaging still needs its own deployment smoke test.
 3. Synchronous WASM has bounded logic and a hard memory limit, but no configurable per-bot fuel/time interrupt. Platform CPU termination is externally enforced and may not yield an application execution log.
 4. Embed domain checks prevent normal unauthorized browser embedding; forged non-browser headers are not authentication. Use authenticated API access where required.
@@ -372,3 +372,21 @@ Without credentials the test is explicitly **ignored**, not counted as a passing
 7. Admin Delete User is application-level deactivation/soft deletion, not permanent erasure of Auth/email/audit records. Implement a reviewed data-retention/erasure process before offering legal deletion guarantees.
 8. Frontend still includes a large Monaco editor chunk, loaded only when Advanced JSON is opened. No arbitrary-code editor or code execution is provided.
 9. Rule outputs are literal values and exact comparisons; free-form JavaScript, arbitrary WASM uploads, external lookups and general arithmetic formulas are intentionally unsupported.
+
+## ตรวจความพร้อมก่อน deploy
+
+รันจากโฟลเดอร์โปรเจกต์:
+
+```sh
+node scripts/preflight.mjs
+```
+
+เครื่องมือนี้อ่าน `.env` และ `.env.edge` ตรวจ URL, ประเภทคีย์สาธารณะ, ความยาว/รูปแบบของ Edge secrets และไฟล์ WASM โดยไม่แสดงค่าคีย์ ไม่แก้ไขข้อมูล และไม่ติดต่อ Supabase หากใช้ไฟล์ชื่ออื่น ระบุได้ตามลำดับ:
+
+```sh
+node scripts/preflight.mjs .env.production .env.edge.production
+```
+
+`FAIL` คือรายการที่ต้องแก้ ส่วน `UNKNOWN` คือยังไม่มีหลักฐานยืนยัน เช่น secrets ที่ตั้งไว้บนเซิร์ฟเวอร์แล้วแต่ไม่มีไฟล์ในเครื่อง เครื่องมือคืน exit code 1 เมื่อพบรายการไม่ผ่านหรือไม่มีไฟล์ Edge secrets; ไม่ใช่คำสั่งสำหรับตัดสิน hosted readiness อัตโนมัติ
+
+หลังรายการในเครื่องผ่าน ยังต้องตรวจ migration/RLS, deploy ทั้ง 7 ฟังก์ชัน, ตั้ง Auth URL/อีเมลและ Cron ตามหัวข้อด้านบน แล้วทดสอบสมัคร → สร้างบอท → รัน → publish → Public/API ด้วยบัญชีจริง ตรวจว่าผู้ใช้ธรรมดาเรียก admin API ไม่ได้ด้วย อย่ารัน initial migration ซ้ำเพื่อแก้ `relation already exists`; ตรวจโครงสร้างที่มีอยู่ก่อน

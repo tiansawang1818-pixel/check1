@@ -1,5 +1,7 @@
 /** Run only against a dedicated real Supabase test project after migrations and
  * deployment. This creates real Auth users and retained audit/execution data.
+ * LIVE_AUTH_MODE=admin-created skips signup emails for an explicitly authorized
+ * hosted smoke test; it does NOT verify public signup or SMTP delivery.
  * No fake Auth, REST responses, databases, or WASM substitutes are used. */
 import { createClient } from "@supabase/supabase-js";
 const url = Deno.env.get("TEST_SUPABASE_URL"),
@@ -54,14 +56,21 @@ Deno.test({
     let bot: any, key = "", otherKey = "";
     try {
       await t.step(
-        "Register actual users, confirm email for automated test and log in",
+        "Create test accounts, confirm for automated testing and log in",
         async () => {
           for (let i = 0; i < 3; i++) {
-            const signup = await clients[i].auth.signUp({
-              email: emails[i],
-              password,
-              options: { data: { username: `Integration ${i}` } },
-            });
+            const signup = Deno.env.get("LIVE_AUTH_MODE") === "admin-created"
+              ? await db.auth.admin.createUser({
+                email: emails[i],
+                password,
+                email_confirm: true,
+                user_metadata: { username: `Integration ${i}` },
+              })
+              : await clients[i].auth.signUp({
+                email: emails[i],
+                password,
+                options: { data: { username: `Integration ${i}` } },
+              });
             assert(!signup.error, signup.error?.message);
             assert(signup.data.user, "Sign-up user missing");
             ids.push(signup.data.user!.id);

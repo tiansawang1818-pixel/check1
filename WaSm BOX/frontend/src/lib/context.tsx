@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useState,
+  useRef,
 } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { api, supabase } from "./api";
@@ -36,32 +37,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [profile, setProfile] = useState<Profile | null>(null),
     [loading, setLoading] = useState(true),
     [error, setError] = useState("");
+  const generation = useRef(0);
   const refresh = useCallback(async () => {
-    if (!supabase) {
-      setLoading(false);
-      return;
-    }
+    const request = ++generation.current;
+    setLoading(true);
+    setProfile(null);
     setError("");
-    const { data: { session }, error } = await supabase.auth.getSession();
-    if (error) setError(error.message);
-    setSession(session);
-    if (session) {
-      const { data, error } = await supabase.from("profiles").select("*").eq(
-        "id",
-        session.user.id,
-      ).single();
-      if (error) setError(error.message);
-      setProfile(data);
-    } else setProfile(null);
-    setLoading(false);
+    try {
+      if (!supabase) return;
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (request !== generation.current) return;
+      if (error) throw error;
+      setSession(session);
+      if (session) {
+        const { data, error } = await supabase.from("profiles").select("*").eq(
+          "id", session.user.id,
+        ).single();
+        if (request !== generation.current) return;
+        if (error) throw error;
+        setProfile(data);
+      }
+    } catch (error) {
+      if (request === generation.current) {
+        setError(error instanceof Error ? error.message : "โหลดข้อมูลบัญชีไม่สำเร็จ กรุณาลองใหม่");
+      }
+    } finally {
+      if (request === generation.current) setLoading(false);
+    }
   }, []);
   useEffect(() => {
     void refresh();
+    let timer: ReturnType<typeof setTimeout> | undefined;
     const subscription = supabase?.auth.onAuthStateChange((_event, session) => {
+      // Invalidate pending profile reads immediately, including on sign-out.
+      ++generation.current;
       setSession(session);
-      setTimeout(() => void refresh(), 0);
+      setProfile(null);
+      setError("");
+      setLoading(Boolean(session));
+      clearTimeout(timer);
+      if (session) timer = setTimeout(() => void refresh(), 0);
     });
-    return () => subscription?.data.subscription.unsubscribe();
+    return () => {
+      ++generation.current;
+      clearTimeout(timer);
+      subscription?.data.subscription.unsubscribe();
+    };
   }, [refresh]);
   return (
     <AuthContext.Provider value={{ session, profile, loading, error, refresh }}>
@@ -132,13 +153,16 @@ export function useResource<T = any>(path: string | null) {
   const reload = useCallback(() => setRevision((x) => x + 1), []);
   useEffect(() => {
     let alive = true;
+    const controller = new AbortController();
+    setData(null);
+    setError("");
     if (!path) {
       setLoading(false);
       return;
     }
     setLoading(true);
     setError("");
-    void api<T>(path).then((d) => {
+    void api<T>(path, "GET", undefined, undefined, { signal: controller.signal }).then((d) => {
       if (alive) setData(d);
     }).catch((e) => {
       if (alive) setError(e.message);
@@ -147,6 +171,7 @@ export function useResource<T = any>(path: string | null) {
     });
     return () => {
       alive = false;
+      controller.abort();
     };
   }, [path, revision]);
   return { data, error, loading, reload };

@@ -1,3 +1,21 @@
+# Hosted acceptance — 5 October 2026
+
+Live Supabase integration: **1 suite, 13 steps passed**, using actual deployed Edge Functions, Postgres, Auth login and Rust WASM. Covers creation, execution/logs, publishing/version snapshots, public/API/embed, ownership/RLS, admin permissions/lifecycle, revocation and rate limiting. Temporary users were admin-created and confirmed automatically, so **public signup and email delivery remain unverified**. Cleanup disables temporary test resources while retaining audit/history.
+
+Local checks this round: **44 Vitest**, **6 Node preflight**, **34 SQL security** checks passed; TypeScript, frontend/test ESLint and production frontend build passed. See DEVELOPMENT_STATUS.md for details.
+
+# Current verification — 4 October 2026
+
+- Frontend/shared TypeScript and frontend/test ESLint passed.
+- Vitest: **44 passed**, including API timeout/cancellation/error handling, profile responses arriving after sign-out, and stale resource reads.
+- Deployment preflight: **6 Node tests passed**. Actual local configuration: frontend URL/key/app URL and WASM header passed; `.env.edge` absent, so server secrets remain **UNKNOWN**. No secrets were printed.
+- Frontend production build passed; large bundle warnings remain.
+- These checks did not rerun the entire Rust/Deno/SQL pipeline, deploy anything, or verify hosted end-to-end behavior.
+
+The historical report below records the checks at that earlier date, not current hosted state. See DEVELOPMENT_STATUS.md for ongoing work.
+
+---
+
 # Verification results — 22 September 2026
 
 The complete `pnpm verify` pipeline passes in this workspace. This report distinguishes local checks from deployment acceptance; **it is not a claim that a Supabase-hosted production deployment has been tested**.
