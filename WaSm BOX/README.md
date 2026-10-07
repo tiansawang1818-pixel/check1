@@ -390,3 +390,18 @@ node scripts/preflight.mjs .env.production .env.edge.production
 `FAIL` คือรายการที่ต้องแก้ ส่วน `UNKNOWN` คือยังไม่มีหลักฐานยืนยัน เช่น secrets ที่ตั้งไว้บนเซิร์ฟเวอร์แล้วแต่ไม่มีไฟล์ในเครื่อง เครื่องมือคืน exit code 1 เมื่อพบรายการไม่ผ่านหรือไม่มีไฟล์ Edge secrets; ไม่ใช่คำสั่งสำหรับตัดสิน hosted readiness อัตโนมัติ
 
 หลังรายการในเครื่องผ่าน ยังต้องตรวจ migration/RLS, deploy ทั้ง 7 ฟังก์ชัน, ตั้ง Auth URL/อีเมลและ Cron ตามหัวข้อด้านบน แล้วทดสอบสมัคร → สร้างบอท → รัน → publish → Public/API ด้วยบัญชีจริง ตรวจว่าผู้ใช้ธรรมดาเรียก admin API ไม่ได้ด้วย อย่ารัน initial migration ซ้ำเพื่อแก้ `relation already exists`; ตรวจโครงสร้างที่มีอยู่ก่อน
+
+### SDK request errors
+
+`WasmBotError.code` preserves server error codes and also identifies local failures:
+
+| Code | Meaning |
+| --- | --- |
+| `INVALID_CONFIG` | Unsupported URL or invalid timeout |
+| `INVALID_INPUT` | Input cannot be serialized as JSON |
+| `ABORTED` | Caller cancelled the request |
+| `TIMEOUT` | Request exceeded `timeoutMs` (default 15 seconds) |
+| `NETWORK_ERROR` | Service could not be reached |
+| `INVALID_RESPONSE` | Server returned unreadable JSON |
+
+The SDK never automatically retries a run. A timeout or cancellation does not undo work already received by the server; inspect execution history before retrying when duplicate execution matters. Keep API keys in server-side code.

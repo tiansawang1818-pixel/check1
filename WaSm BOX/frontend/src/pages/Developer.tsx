@@ -29,26 +29,26 @@ export function ApiKeys() {
     <>
       <Heading
         eyebrow="DEVELOPER"
-        title="API keys"
-        description="Give your applications scoped access to your bots."
+        title="กุญแจ API"
+        description="กำหนดสิทธิ์ให้แอปพลิเคชันเชื่อมต่อบอทของคุณ"
       >
         <button className="primary" onClick={() => setCreate(!create)}>
-          <Plus size={17} />Create API key
+          <Plus size={17} />สร้างกุญแจ API
         </button>
       </Heading>
       {key && (
-        <Panel title="Copy your API key now">
+        <Panel title="คัดลอกกุญแจ API เก็บไว้ตอนนี้">
           <p>
-            You will not be able to see it again. Keep it on a trusted server.
+            กุญแจจะแสดงครั้งเดียว เก็บไว้บนเซิร์ฟเวอร์ที่คุณควบคุม
           </p>
           <Code>{key}</Code>
           <button className="secondary" onClick={() => setKey("")}>
-            I have saved this key
+            บันทึกกุญแจไว้แล้ว
           </button>
         </Panel>
       )}
       {create && (
-        <Panel title="Create a key">
+        <Panel title="สร้างกุญแจใหม่">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -62,20 +62,20 @@ export function ApiKeys() {
                 setCreate(false);
                 setName("");
                 reload();
-              }, "API key created.");
+              }, "สร้างกุญแจ API แล้ว");
             }}
           >
             <label>
-              Name<input
+              ชื่อ<input
                 required
                 maxLength={100}
-                placeholder="Production application"
+                placeholder="เช่น แอปสำหรับใช้งานจริง"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
             </label>
             <fieldset>
-              <legend>Permissions</legend>
+              <legend>สิทธิ์การใช้งาน</legend>
               {["bot:run", "bot:read", "execution:read"].map((s) => (
                 <label className="check-label" key={s}>
                   <input
@@ -90,7 +90,7 @@ export function ApiKeys() {
                           ),
                       )}
                   />
-                  {s}
+                  {{ "bot:run": "รันบอท", "bot:read": "อ่านรูปแบบข้อมูลบอท", "execution:read": "อ่านประวัติการรัน" }[s]} <code>{s}</code>
                 </label>
               ))}
             </fieldset>
@@ -99,7 +99,7 @@ export function ApiKeys() {
                 type="checkbox"
                 checked={all}
                 onChange={(e) => setAll(e.target.checked)}
-              />All my bots
+              />บอททั้งหมดของฉัน
             </label>
             {!all && (bots.loading
               ? <Loading />
@@ -126,7 +126,7 @@ export function ApiKeys() {
               className="primary"
               disabled={busy || !scopes.length || !all && !allowed.length}
             >
-              Generate key
+              สร้างกุญแจ
             </button>
           </form>
         </Panel>
@@ -143,13 +143,13 @@ export function ApiKeys() {
                   <table>
                     <thead>
                       <tr>
-                        <th>Name</th>
-                        <th>Key</th>
-                        <th>Scope</th>
-                        <th>Usage</th>
-                        <th>Last used</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <th>ชื่อ</th>
+                        <th>กุญแจ</th>
+                        <th>สิทธิ์</th>
+                        <th>จำนวนครั้งที่ใช้</th>
+                        <th>ใช้ล่าสุด</th>
+                        <th>สถานะ</th>
+                        <th>จัดการ</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -167,7 +167,7 @@ export function ApiKeys() {
                           <td>
                             {k.last_used_at
                               ? formatDate(k.last_used_at)
-                              : "Never"}
+                              : "ยังไม่เคยใช้"}
                           </td>
                           <td>
                             <Badge>{k.revoked_at ? "REVOKED" : "ACTIVE"}</Badge>
@@ -178,7 +178,7 @@ export function ApiKeys() {
                                 className="text-link"
                                 disabled={busy}
                                 onClick={() => {
-                                  const name = prompt("New key name", k.name);
+                                  const name = prompt("ชื่อใหม่ของกุญแจ", k.name);
                                   if (name) {
                                     void run(async () => {
                                       await api(
@@ -191,7 +191,7 @@ export function ApiKeys() {
                                   }
                                 }}
                               >
-                                Rename
+                                เปลี่ยนชื่อ
                               </button>
                               <button
                                 className="text-link"
@@ -199,7 +199,7 @@ export function ApiKeys() {
                                 onClick={() => {
                                   if (
                                     confirm(
-                                      `Revoke ${k.name}? Applications using it will stop working.`,
+                                      `เพิกถอน ${k.name} หรือไม่? แอปที่ใช้กุญแจนี้จะเชื่อมต่อไม่ได้`,
                                     )
                                   ) {
                                     void run(async () => {
@@ -211,13 +211,13 @@ export function ApiKeys() {
                                   }
                                 }}
                               >
-                                Revoke
+                                เพิกถอน
                               </button>
                               <button
                                 className="danger-text"
                                 disabled={busy}
                                 onClick={() => {
-                                  if (confirm(`Delete ${k.name}?`)) {
+                                  if (confirm(`ลบกุญแจ ${k.name} หรือไม่?`)) {
                                     void run(async () => {
                                       await api(
                                         `api-keys?id=${k.id}`,
@@ -228,7 +228,7 @@ export function ApiKeys() {
                                   }
                                 }}
                               >
-                                Delete
+                                ลบ
                               </button>
                             </div>
                           </td>
@@ -239,9 +239,9 @@ export function ApiKeys() {
                 </div>
               )
               : (
-                <Empty title="No API keys">
+                <Empty title="ยังไม่มีกุญแจ API">
                   <KeyRound />
-                  <p>Create a key to call your bots from an application.</p>
+                  <p>สร้างกุญแจเพื่อเรียกบอทจากแอปพลิเคชันของคุณ</p>
                 </Empty>
               )}
           </Panel>
@@ -259,7 +259,7 @@ export function Developer() {
         description="Run the same published logic across your products."
       >
         <Link className="primary" to="/developer/api-keys">
-          <KeyRound size={16} />Manage API keys
+          <KeyRound size={16} />จัดการกุญแจ API
         </Link>
       </Heading>
       <div className="docs-grid">
@@ -393,10 +393,10 @@ export function Profile() {
   return (
     <>
       <Heading
-        title="Profile"
-        description="Your account and workspace identity."
+        title="โปรไฟล์"
+        description="จัดการข้อมูลบัญชีและชื่อที่แสดงในพื้นที่ทำงาน"
       />
-      <Panel title="Account details">
+      <Panel title="ข้อมูลบัญชี">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -406,11 +406,11 @@ export function Profile() {
               }).eq("id", profile!.id);
               if (error) throw error;
               await refresh();
-            }, "Profile updated.");
+            }, "บันทึกโปรไฟล์แล้ว");
           }}
         >
           <label>
-            Name<input
+            ชื่อ<input
               required
               maxLength={100}
               value={name}
@@ -418,19 +418,19 @@ export function Profile() {
             />
           </label>
           <label>
-            Email<input disabled value={profile?.email || ""} />
+            อีเมล<input disabled value={profile?.email || ""} />
           </label>
           <p>
             <Badge>{profile?.role}</Badge>
           </p>
           <div className="actions">
-            <button className="primary" disabled={busy}>Save profile</button>
+            <button className="primary" disabled={busy}>บันทึกโปรไฟล์</button>
             <Link to="/forgot-password" className="secondary">
-              Reset password
+              ตั้งรหัสผ่านใหม่
             </Link>
           </div>
         </form>
-        <p className="muted">Account ID</p>
+        <p className="muted">รหัสบัญชี</p>
         <code>{profile?.id}</code> <CopyButton value={profile?.id || ""} />
       </Panel>
     </>

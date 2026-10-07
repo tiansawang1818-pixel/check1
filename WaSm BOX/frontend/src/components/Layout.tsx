@@ -105,7 +105,7 @@ export function Layout() {
                 if (error) throw error;
               })}
           >
-            <LogOut size={18} />Sign out
+            <LogOut size={18} />ออกจากระบบ
           </button>
         </div>
       </aside>

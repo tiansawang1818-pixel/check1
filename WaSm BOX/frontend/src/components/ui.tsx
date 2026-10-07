@@ -73,7 +73,7 @@ export function Empty(
   );
 }
 export function CopyButton(
-  { value, label = "Copy" }: { value: string; label?: string },
+  { value, label = "คัดลอก" }: { value: string; label?: string },
 ) {
   const [copied, setCopied] = useState(false);
   const toast = useToast();

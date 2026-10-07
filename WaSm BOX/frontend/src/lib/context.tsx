@@ -118,7 +118,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         >
           {toast.message}
           <button
-            aria-label="Dismiss notification"
+            aria-label="ปิดการแจ้งเตือน"
             onClick={() => setToast(null)}
           >
             ×
@@ -132,14 +132,18 @@ export const useToast = () => useContext(ToastContext);
 export function useAction() {
   const [busy, setBusy] = useState(false);
   const notify = useToast();
+  const inFlight = useRef(false);
   async function run(fn: () => Promise<void>, message?: string) {
+    if (inFlight.current) return;
+    inFlight.current = true;
     setBusy(true);
     try {
       await fn();
       if (message) notify(message);
     } catch (e) {
-      notify((e as Error).message, true);
+      notify(e instanceof Error ? e.message : "ดำเนินการไม่สำเร็จ กรุณาลองใหม่", true);
     } finally {
+      inFlight.current = false;
       setBusy(false);
     }
   }

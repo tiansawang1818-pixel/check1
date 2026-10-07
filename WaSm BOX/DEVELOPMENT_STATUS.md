@@ -38,3 +38,27 @@ Live integration passed all 13 steps against the deployed WASMBOX project: tempo
 Mode: LIVE_AUTH_MODE=admin-created. Three temporary accounts were created with Auth Admin and logged in normally. This does not test public signup emails or SMTP. Cleanup soft-deletes test bots, revokes test keys, suspends test profiles and bans the temporary Auth accounts; retained audit/execution records are intentional. Existing user accounts were not modified.
 
 Local validation: 44 Vitest tests, 6 preflight tests and 34 PostgreSQL migration/security checks passed. Hosted webhook delivery, public signup/email confirmation, browser acceptance and frontend hosting remain outstanding.
+
+## Route loading — 2026-10-05 (local, not yet pushed)
+
+Dashboard, bot editor, history, developer/profile and public pages now load on demand with per-route Suspense loading states. Layout remains outside the route loading boundary. Error and not-found pages use Thai text.
+
+Production main JavaScript decreased from 1,041.67 kB (299.64 kB gzip) to 541.08 kB (156.79 kB gzip), about 48% smaller. Dashboard charts and advanced Monaco editor remain separate large payloads loaded when used. This is bundle measurement, not measured browser latency. TypeScript, ESLint, 44 Vitest tests and production build passed. Browser navigation smoke check remains pending for this change.
+
+## Thai account and API UI — 2026-10-07 (local)
+
+Translated profile labels/actions, API key creation/management/revocation prompts, permission explanations, empty state, sign-out, copy and toast-dismiss labels. Technical scope identifiers stay intact. TypeScript, ESLint and 44 tests passed. Real authenticated browser inspection confirmed profile renders and navigation to API keys works, including its empty state and creation form. No key was created and no account data was changed. Screenshot: artifacts/screenshots/api-thai.png (ignored). Other lazy routes and the production build still need browser smoke checks; no claim of full browser acceptance.
+
+## Duplicate submission guard — 2026-10-07 (local)
+
+useAction now locks synchronously before starting an operation, preventing two invocations in the same render cycle from sending duplicate mutations. This applies to the bot builder and other actions using the shared hook. The lock releases after success or failure; non-Error rejections show a Thai fallback message. It does not provide cross-tab or server-side idempotency and does not retry writes automatically.
+
+Regression tests cover same-tick duplicate invocation, busy state, lock release after failure and a subsequent retry. TypeScript, ESLint and all 46 Vitest tests passed. Changes remain local pending the next reviewed upload.
+
+## SDK request failures — 2026-10-07 (local)
+
+SDK now validates URL scheme/credentials and timeout range, reports INVALID_INPUT for nonserializable payloads, skips transport for pre-cancelled requests and normalizes TIMEOUT, ABORTED, NETWORK_ERROR and INVALID_RESPONSE as WasmBotError. Server response error codes remain intact; writes are never retried automatically. SDK declaration build, lint and 52 Vitest tests passed. Changes are not yet pushed.
+
+## Upload batch — 2026-10-07
+
+The route-loading, Thai account/API interface, duplicate-submission guard and SDK error handling described above are included in this upload batch. Their earlier "local" labels record status when first implemented. Final local checks: 52 Vitest tests, 6 preflight tests, frontend/shared/SDK TypeScript, ESLint and production frontend/SDK builds passed. Initial JS is 541.31 kB (156.83 kB gzip). CI confirmation is recorded in the chat after push; email/browser acceptance beyond the checks above, webhook delivery and frontend hosting remain outstanding.

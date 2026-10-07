@@ -10,15 +10,47 @@ import { configured } from "./lib/api";
 import { AuthProvider, ToastProvider } from "./lib/context";
 import { AuthPage, Setup } from "./pages/Auth";
 import { Layout } from "./components/Layout";
-import { Bots, Dashboard } from "./pages/Dashboard";
-import { BotDetail, NewBot } from "./pages/BotDetail";
-import { ExecutionDetail, History } from "./pages/History";
-import { ApiKeys, Developer, Profile } from "./pages/Developer";
-import { PublicBot } from "./pages/PublicBot";
+import { Loading } from "./components/ui";
 import { AdminLayout } from "./components/AdminLayout";
+const Bots = lazy(() =>
+  import("./pages/Dashboard").then((module) => ({ default: module.Bots }))
+);
+const Dashboard = lazy(() =>
+  import("./pages/Dashboard").then((module) => ({ default: module.Dashboard }))
+);
+const BotDetail = lazy(() =>
+  import("./pages/BotDetail").then((module) => ({ default: module.BotDetail }))
+);
+const NewBot = lazy(() =>
+  import("./pages/BotDetail").then((module) => ({ default: module.NewBot }))
+);
+const ExecutionDetail = lazy(() =>
+  import("./pages/History").then((module) => ({
+    default: module.ExecutionDetail,
+  }))
+);
+const History = lazy(() =>
+  import("./pages/History").then((module) => ({ default: module.History }))
+);
+const ApiKeys = lazy(() =>
+  import("./pages/Developer").then((module) => ({ default: module.ApiKeys }))
+);
+const Developer = lazy(() =>
+  import("./pages/Developer").then((module) => ({ default: module.Developer }))
+);
+const Profile = lazy(() =>
+  import("./pages/Developer").then((module) => ({ default: module.Profile }))
+);
+const PublicBot = lazy(() =>
+  import("./pages/PublicBot").then((module) => ({ default: module.PublicBot }))
+);
 const Admin = lazy(() =>
   import("./pages/Admin").then((module) => ({ default: module.Admin }))
 );
+function page(content: ReactNode) {
+  return <Suspense fallback={<Loading />}>{content}</Suspense>;
+}
+
 class ErrorBoundary
   extends Component<{ children: ReactNode }, { error: boolean }> {
   state = { error: false };
@@ -32,9 +64,9 @@ class ErrorBoundary
     return this.state.error
       ? (
         <main className="setup">
-          <h1>Something went wrong</h1>
-          <p>Reload the page to try again.</p>
-          <button onClick={() => location.reload()}>Reload</button>
+          <h1>เปิดหน้านี้ไม่สำเร็จ</h1>
+          <p>กรุณาโหลดหน้าเว็บใหม่ หากเพิ่งอัปเดตระบบ เบราว์เซอร์อาจยังใช้ไฟล์เวอร์ชันเดิม</p>
+          <button onClick={() => location.reload()}>โหลดใหม่</button>
         </main>
       )
       : this.props.children;
@@ -61,23 +93,29 @@ export default function App() {
                     />
                   ),
                 )}
-                <Route path="/b/:slug" element={<PublicBot />} />
-                <Route path="/embed/:slug" element={<PublicBot />} />
+                <Route path="/b/:slug" element={page(<PublicBot />)} />
+                <Route path="/embed/:slug" element={page(<PublicBot />)} />
                 <Route element={<Layout />}>
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/bots" element={<Bots />} />
-                  <Route path="/bots/new" element={<NewBot />} />
-                  <Route path="/bots/:id" element={<BotDetail />} />
-                  <Route path="/bots/:id/:tab" element={<BotDetail />} />
-                  <Route path="/history" element={<History />} />
-                  <Route path="/history/:id" element={<ExecutionDetail />} />
-                  <Route path="/developer" element={<Developer />} />
-                  <Route path="/developer/api-keys" element={<ApiKeys />} />
+                  <Route path="/dashboard" element={page(<Dashboard />)} />
+                  <Route path="/bots" element={page(<Bots />)} />
+                  <Route path="/bots/new" element={page(<NewBot />)} />
+                  <Route path="/bots/:id" element={page(<BotDetail />)} />
+                  <Route path="/bots/:id/:tab" element={page(<BotDetail />)} />
+                  <Route path="/history" element={page(<History />)} />
+                  <Route
+                    path="/history/:id"
+                    element={page(<ExecutionDetail />)}
+                  />
+                  <Route path="/developer" element={page(<Developer />)} />
+                  <Route
+                    path="/developer/api-keys"
+                    element={page(<ApiKeys />)}
+                  />
                   <Route
                     path="/settings/api-keys"
                     element={<Navigate to="/developer/api-keys" replace />}
                   />
-                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/profile" element={page(<Profile />)} />
                 </Route>
                 <Route element={<AdminLayout />}>
                   <Route
@@ -109,8 +147,8 @@ export default function App() {
                   path="*"
                   element={
                     <main className="setup">
-                      <h1>Page not found</h1>
-                      <a href="/">Back to workspace</a>
+                      <h1>ไม่พบหน้านี้</h1>
+                      <a href="/">กลับพื้นที่ทำงาน</a>
                     </main>
                   }
                 />
