@@ -62,3 +62,17 @@ SDK now validates URL scheme/credentials and timeout range, reports INVALID_INPU
 ## Upload batch — 2026-10-07
 
 The route-loading, Thai account/API interface, duplicate-submission guard and SDK error handling described above are included in this upload batch. Their earlier "local" labels record status when first implemented. Final local checks: 52 Vitest tests, 6 preflight tests, frontend/shared/SDK TypeScript, ESLint and production frontend/SDK builds passed. Initial JS is 541.31 kB (156.83 kB gzip). CI confirmation is recorded in the chat after push; email/browser acceptance beyond the checks above, webhook delivery and frontend hosting remain outstanding.
+
+## Run form correctness — 2026-10-07 (local)
+
+BotForm now prevents simultaneous submissions independently of the shared useAction hook, filters obsolete fields out when its input schema changes, and identifies malformed JSON by field label in Thai. Default run/loading/select labels are Thai. Optional empty values retain existing schema behavior; no implicit numeric zero is added. Regression tests cover duplicate requests, schema changes and malformed JSON without a network call. TypeScript, ESLint and 55 Vitest tests passed. This change has not yet been pushed.
+
+## Browser acceptance — 2026-10-11
+
+Created the clearly named bot "ทดสอบหน้าเว็บ 11 ต.ค. 2026" through the authenticated browser wizard with the grade template. Draft execution with score 85 returned A. Enabled only the public-page channel and published version 1. The public page loaded and score 72 returned B, version 1, through the hosted Edge/WASM backend. The synthetic example remains published for inspection. Screenshot: artifacts/screenshots/public-bot-oct11.png (ignored).
+
+Frontend was served locally at 127.0.0.1:5174; this is not evidence of public frontend hosting. Browser used an existing signed-in session; anonymous backend access was covered by the earlier live acceptance suite, not a new logged-out browser session today.
+
+Submitted one password-reset request for the user-provided existing account through the browser. Supabase returned success and the generic confirmation appeared. Inbox delivery, opening the recovery link, user-completed password change and subsequent login remain unverified. New-account signup/email confirmation also remains outstanding because the provided address is already registered. No password was entered or changed by the agent.
+
+Run-form upload validation: TypeScript, ESLint, 55 Vitest tests and production build passed. Build retains the existing large-chunk warning. The run-form changes above are included in this upload; CI status will be reported after push.

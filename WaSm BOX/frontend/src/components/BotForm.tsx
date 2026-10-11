@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Play } from "lucide-react";
 import type { Field } from "../../../supabase/functions/_shared/schema";
 import { validateInput } from "../../../supabase/functions/_shared/schema";
 import { ErrorBox, Json } from "./ui";
 export function BotForm(
-  { fields, onRun, buttonText = "Run bot", placeholder = "" }: {
+  { fields, onRun, buttonText = "รันบอท", placeholder = "" }: {
     fields: Field[];
     onRun: (value: Record<string, unknown>) => Promise<void>;
     buttonText?: string;
@@ -14,21 +14,29 @@ export function BotForm(
   const [values, setValues] = useState<Record<string, unknown>>({}),
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
+  const inFlight = useRef(false);
   const set = (f: Field, v: unknown) =>
     setValues((x) => ({ ...x, [f.name]: v }));
   return (
     <form
       onSubmit={async (e) => {
         e.preventDefault();
+        if (inFlight.current) return;
+        inFlight.current = true;
         setError("");
         setBusy(true);
         try {
-          const input = { ...values };
+          const input: Record<string, unknown> = Object.fromEntries(
+            fields.filter((f) => values[f.name] !== undefined).map((f) => [f.name, values[f.name]]),
+          );
           for (const f of fields) {
             if (
               f.type === "json" && typeof input[f.name] === "string" &&
               input[f.name] !== ""
-            ) input[f.name] = JSON.parse(input[f.name] as string);
+            ) {
+              try { input[f.name] = JSON.parse(input[f.name] as string); }
+              catch { throw new Error(`${f.label}: กรุณากรอก JSON ให้ถูกต้อง`); }
+            }
             if (f.type === "boolean" && input[f.name] === undefined) {
               input[
                 f.name
@@ -38,8 +46,9 @@ export function BotForm(
           validateInput({ fields }, input);
           await onRun(input);
         } catch (e) {
-          setError((e as Error).message);
+          setError(e instanceof Error ? e.message : "รันบอทไม่สำเร็จ กรุณาลองใหม่");
         } finally {
+          inFlight.current = false;
           setBusy(false);
         }
       }}
@@ -63,7 +72,7 @@ export function BotForm(
                 value={String(values[f.name] ?? "")}
                 onChange={(e) => set(f, e.target.value)}
               >
-                <option value="">Choose an option</option>
+                <option value="">เลือกตัวเลือก</option>
                 {f.options?.map((o) => <option key={o}>{o}</option>)}
               </select>
             )
@@ -109,7 +118,7 @@ export function BotForm(
       {error && <ErrorBox error={error} />}
       <button disabled={busy} className="primary" type="submit">
         <Play size={16} />
-        {busy ? "Running…" : buttonText}
+        {busy ? "กำลังรัน…" : buttonText}
       </button>
     </form>
   );
