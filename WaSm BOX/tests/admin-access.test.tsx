@@ -80,7 +80,7 @@ it("allows active administrators", () => {
   showGuard();
   expect(screen.getByText("ADMIN SECRET")).toBeTruthy();
 });
-it("keeps the user navigation free of admin links", () => {
+it("keeps ordinary user navigation free of admin links", () => {
   render(
     <MemoryRouter>
       <Layout />
@@ -88,4 +88,15 @@ it("keeps the user navigation free of admin links", () => {
   );
   expect(document.querySelector('a[href^="/admin"]')).toBeNull();
   expect(screen.getByRole("link", { name: "สร้างบอท" })).toBeTruthy();
+});
+it("shows administrators a clear link to the admin center", () => {
+  state.profile!.role = "ADMIN";
+  render(
+    <MemoryRouter>
+      <Layout />
+    </MemoryRouter>,
+  );
+  expect(
+    screen.getByRole("link", { name: "ศูนย์ผู้ดูแล" }).getAttribute("href"),
+  ).toBe("/admin");
 });

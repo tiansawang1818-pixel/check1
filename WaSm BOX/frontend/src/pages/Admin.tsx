@@ -35,13 +35,18 @@ const adminMetricLabels: Record<string, string> = {
 };
 
 const settingLabels: Record<string, string> = {
+  max_bots_per_user: "จำนวนบอทสูงสุดต่อผู้ใช้",
   public_rate_limit: "จำนวนเรียกหน้าสาธารณะต่อนาที",
   api_rate_limit: "จำนวนเรียก API ต่อนาที",
+  max_api_keys_per_user: "จำนวนกุญแจ API สูงสุดต่อผู้ใช้",
   max_payload_bytes: "ขนาดข้อมูลเข้าสูงสุด (ไบต์)",
   max_output_bytes: "ขนาดผลลัพธ์สูงสุด (ไบต์)",
   max_memory_bytes: "หน่วยความจำสูงสุด (ไบต์)",
   maintenance_mode: "โหมดปิดปรับปรุงระบบ",
   allow_registration: "อนุญาตให้สมัครสมาชิก",
+  allow_public_bots: "อนุญาตบอทสาธารณะ",
+  allow_api_access: "อนุญาตการใช้งานผ่าน API",
+  allow_embed: "อนุญาตการฝังบอทในเว็บไซต์",
 };
 export function Admin() {
   const { profile } = useAuth();

@@ -12,6 +12,7 @@ import {
   Menu,
   Plus,
   Shield,
+  ShieldCheck,
   User,
   X,
 } from "lucide-react";
@@ -101,6 +102,11 @@ export function Layout() {
               {title}
             </NavLink>
           ))}
+          {profile?.role === "ADMIN" && (
+            <NavLink to="/admin" onClick={() => setOpen(false)}>
+              <ShieldCheck size={19} />ศูนย์ผู้ดูแล
+            </NavLink>
+          )}
         </nav>
         <details className="advanced-navigation">
           <summary>สำหรับผู้พัฒนา</summary>
