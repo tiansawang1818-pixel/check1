@@ -137,3 +137,16 @@ checks += 2;
 console.log(
   `WASM verification: ${checks} checks passed; zero imports; hard 32 MiB memory cap; all operators and AND/OR run inside Rust WASM.`,
 );
+// Execute mixed groups in the compiled engine, including limits in unreachable branches.
+const nestedRule={version:1,rules:[{conditions:[],match:"OR",groups:[
+  {conditions:[{field:"x",operator:">=",value:80},{field:"x",operator:"<=",value:90}],match:"AND"},
+  {conditions:[{field:"x",operator:"==",value:42}],match:"AND"}
+],output:"hit"}],defaultOutput:"miss"};
+for(const [x,output] of [[85,"hit"],[42,"hit"],[95,"miss"],[60,"miss"]]) assert.equal((await call(nestedRule,{x})).output,output);
+const invalid=structuredClone(nestedRule);
+invalid.rules[0].groups.push({conditions:[],match:"AND"});
+assert.equal((await call(invalid,{x:85})).success,false);
+let deep={conditions:[{field:"x",operator:"==",value:1}],match:"AND"};
+for(let i=0;i<5;i++) deep={conditions:[],match:"AND",groups:[deep]};
+assert.equal((await call({version:1,rules:[{...deep,output:true}],defaultOutput:false},{x:1})).success,false);
+console.log("Nested WASM: mixed AND/OR truth table, empty unreachable branch and depth limit passed.");

@@ -15,7 +15,7 @@ export function ColorPlayground() {
   const current = steps[stage];
   const Icon = current.icon;
   return <section className="color-playground" data-palette={palettes[palette]} aria-label="สำรวจเส้นทางสร้างบอท">
-    <header className="playground-header"><div><span className="section-overline">YOUR NEXT BIG IDEA</span><h2>จากไอเดีย สู่ผู้ช่วยของคุณ<span>✳</span></h2><p>กดเลือกแต่ละขั้น แล้วลองเล่นกับสีได้เลย</p></div><div className="playground-controls">
+    <header className="playground-header"><div><span className="section-overline">เริ่มสร้างบอทของคุณ</span><h2>จากไอเดีย สู่ผู้ช่วยของคุณ<span>✳</span></h2><p>กดเลือกแต่ละขั้น แล้วลองเล่นกับสีได้เลย</p></div><div className="playground-controls">
       <button type="button" onClick={() => setPalette((palette + 1) % palettes.length)} aria-label="เปลี่ยนชุดสีลูกเล่น"><Palette size={16} />เปลี่ยนสี <span className="palette-dots" aria-hidden="true"><i /><i /><i /></span></button>
       <button type="button" data-color-burst onClick={() => setPulse(pulse + 1)}><Sparkles size={16} />ระเบิดสี</button>
     </div></header>

@@ -28,7 +28,7 @@ export function ApiKeys() {
   return (
     <>
       <Heading
-        eyebrow="DEVELOPER"
+        eyebrow="สำหรับผู้พัฒนา"
         title="กุญแจ API"
         description="กำหนดสิทธิ์ให้แอปพลิเคชันเชื่อมต่อบอทของคุณ"
       >
@@ -254,9 +254,9 @@ export function Developer() {
   return (
     <>
       <Heading
-        eyebrow="DEVELOPER RESOURCES"
-        title="Connect your bots"
-        description="Run the same published logic across your products."
+        eyebrow="สำหรับผู้พัฒนา"
+        title="คู่มือเชื่อมต่อ"
+        description="เรียกใช้บอทที่เผยแพร่แล้วผ่าน API หรือฝังบนเว็บไซต์"
       >
         <Link className="primary" to="/developer/api-keys">
           <KeyRound size={16} />จัดการกุญแจ API
@@ -264,24 +264,23 @@ export function Developer() {
       </Heading>
       <div className="docs-grid">
         <div>
-          <Panel title="1. Authenticate">
+          <Panel title="1. ยืนยันสิทธิ์การเชื่อมต่อ">
             <p>
-              Create an API key with the <code>bot:run</code>{" "}
-              permission. Keys are scoped to your account and optionally to
-              selected bots.
+              สร้างกุญแจ API ที่มีสิทธิ์ <code>bot:run</code>{" "}
+              โดยกุญแจจะใช้ได้เฉพาะบัญชีของคุณ และเลือกจำกัดเฉพาะบางบอทได้
             </p>
             <Code>{"Authorization: Bearer wbot_live_YOUR_API_KEY"}</Code>
             <p>
-              Send keys from your backend or trusted automation. For a public
-              website, use the Public Page or Embed Widget.
+              ส่งกุญแจจากระบบหลังบ้านหรือระบบอัตโนมัติที่เชื่อถือได้
+              หากเป็นเว็บไซต์สาธารณะ ให้ใช้หน้าบอทสาธารณะหรือโค้ดฝังบอท
             </p>
           </Panel>
-          <Panel title="2. Call your bot">
-            <p>Publish a version and turn on API Access in the Deploy tab.</p>
+          <Panel title="2. เรียกใช้งานบอท">
+            <p>เผยแพร่บอท แล้วเปิดการเชื่อมต่อ API ในหน้าเผยแพร่</p>
             <Code>{`POST ${apiUrl}/api-run`}</Code>
             <Code>{sample.curl}</Code>
           </Panel>
-          <Panel title="3. Read the result">
+          <Panel title="3. อ่านผลลัพธ์">
             <Code>
               {JSON.stringify(
                 {
@@ -298,11 +297,10 @@ export function Developer() {
               )}
             </Code>
             <p className="muted">
-              Example response format. Actual timings and IDs come from each
-              execution.
+              ตัวอย่างรูปแบบคำตอบ เวลาและรหัสคำขอจริงจะแตกต่างกันในแต่ละครั้ง
             </p>
           </Panel>
-          <Panel title="JavaScript (server)">
+          <Panel title="JavaScript บนเซิร์ฟเวอร์">
             <Code>{sample.javascript}</Code>
           </Panel>
           <Panel title="Python">
@@ -315,52 +313,52 @@ export function Developer() {
               }',\n  bot: 'grade-calculator-a82f',\n  apiKey: process.env.WASMBOT_API_KEY\n});\nconst result = await bot.run({ score: 85 });\nconsole.log(result.data);`}
             </Code>
             <p>
-              Build the included SDK package and install it from your project.
-              It is not published to npm automatically.
+              สร้างแพ็กเกจ SDK ที่ให้มากับโปรเจกต์ แล้วติดตั้งจากภายในโปรเจกต์ของคุณ
+              ระบบจะไม่เผยแพร่แพ็กเกจนี้ขึ้น npm โดยอัตโนมัติ
             </p>
           </Panel>
-          <Panel title="Webhook signatures">
+          <Panel title="ตรวจสอบลายเซ็น Webhook">
             <p>
-              Verify{" "}
+              ตรวจสอบ{" "}
               <code>X-WasmBot-Signature: t=TIMESTAMP,v1=HEX_SIGNATURE</code>
               {" "}
-              with HMAC-SHA256 over{" "}
+              ด้วย HMAC-SHA256 จาก{" "}
               <code>TIMESTAMP + "." + rawRequestBody</code>{" "}
-              and your webhook secret. Reject timestamps older than five minutes
-              and deduplicate using the delivery ID.
+              และรหัสลับ Webhook ของคุณ ปฏิเสธเวลาที่เก่ากว่าห้านาที
+              และป้องกันรายการซ้ำด้วย delivery ID
             </p>
           </Panel>
         </div>
         <aside>
-          <Panel title="API essentials">
+          <Panel title="ข้อกำหนดสำคัญของ API">
             <dl>
-              <dt>Default API rate</dt>
+              <dt>จำนวนเรียก API เริ่มต้น</dt>
               <dd>30 requests/minute/key</dd>
-              <dt>Default public rate</dt>
+              <dt>จำนวนเรียกผ่านหน้าสาธารณะ</dt>
               <dd>20 requests/minute/IP</dd>
-              <dt>Payload / output</dt>
+              <dt>ข้อมูลเข้า / ผลลัพธ์</dt>
               <dd>64 KiB each</dd>
-              <dt>WASM memory</dt>
+              <dt>หน่วยความจำ WASM</dt>
               <dd>32 MiB maximum</dd>
             </dl>
             <p className="muted">
-              Bot and system settings may lower these limits. On HTTP 429,
-              respect Retry-After.
+              การตั้งค่าบอทหรือระบบอาจกำหนดเพดานต่ำกว่านี้ เมื่อได้รับ HTTP 429
+              ให้รอตามค่า Retry-After ก่อนเรียกใหม่
             </p>
           </Panel>
-          <Panel title="Permissions">
+          <Panel title="สิทธิ์การใช้งาน">
             <p>
-              <code>bot:run</code> — run published logic
+              <code>bot:run</code> — เรียกใช้บอทที่เผยแพร่แล้ว
             </p>
             <p>
-              <code>bot:read</code> — read published schema with action: read
+              <code>bot:read</code> — อ่านรูปแบบข้อมูลของบอทที่เผยแพร่แล้ว
             </p>
             <p>
               <code>execution:read</code>{" "}
-              — read last 50 executions with action: executions
+              — อ่านประวัติการทำงาน 50 รายการล่าสุด
             </p>
           </Panel>
-          <Panel title="Error codes">
+          <Panel title="รหัสข้อผิดพลาด">
             {[
               "UNAUTHORIZED",
               "FORBIDDEN",

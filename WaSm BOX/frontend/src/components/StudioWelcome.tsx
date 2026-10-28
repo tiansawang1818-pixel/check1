@@ -1,93 +1,48 @@
-import {
-  ArrowDown,
-  ArrowUpRight,
-  Bot,
-  Check,
-  Layers3,
-  Sparkles,
-} from "lucide-react";
+import { PencilStudy } from "./Sketchbook";
+import { GalleryWall } from "./GalleryWall";
+import { Check, Layers3, Pause, Play } from "lucide-react";
 import { useState, type ReactNode } from "react";
-import { ColorPlayground } from "./ColorPlayground";
 
-export function StudioWelcome(
-  { name, action }: { name?: string; action: ReactNode },
-) {
-  const [activeStage, setActiveStage] = useState(0);
-  return (
-    <>
-    <section className="studio-hero" aria-label="เริ่มต้นใช้งานบอท">
-      <div className="hero-art" aria-hidden="true"><div className="hero-perspective-grid" /><div className="hero-aurora" /><div className="orb-satellites">{Array.from({length: 8}, (_, i) => <i key={i} style={{"--satellite": i} as import("react").CSSProperties} />)}</div><span className="floating-token token-one">IF → THEN</span><span className="floating-token token-two">✦ YOUR RULES</span><div className="color-orb" /><div className="orb-ring" /><span className="art-star star-one">✳</span><span className="art-star star-two">✦</span><span className="art-coordinate">01 / CREATIVE AUTOMATION</span></div>
-      <div className="studio-hero-copy">
-        <span className="hero-eyebrow">
-          <span />พื้นที่ของไอเดียที่ทำงานได้จริง
-        </span>
-        <p className="hero-greeting">
-          {name ? `สวัสดี ${name}` : "ยินดีต้อนรับสู่ WasmBot Studio"}
-        </p>
-        <h1>
-          <span className="hero-line">ไอเดียคุณ</span>
-          <em className="hero-line">เป็นไปได้<span className="title-spark">✦</span></em>
-          <span className="hero-line hero-outline">ให้บอทช่วยทำ.</span>
-        </h1>
-        <p className="hero-description">
-          เปลี่ยนเงื่อนไขในชีวิตประจำวันให้เป็นบอท<br className="desktop-break" />{" "}
-          ตั้งกฎง่าย ๆ แล้วนำไปใช้ได้ทุกที่ โดยไม่ต้องเขียนโค้ด
-        </p>
-        <div className="hero-actions">
-          {action}
-          <span>
-            <Check size={15} />เริ่มจากตัวอย่างได้เลย
-          </span>
-        </div>
-      </div>
-      <div
-        className="hero-workflow"
-        aria-label="ขั้นตอนการทำงาน: รับข้อมูล ตรวจเงื่อนไข ส่งคำตอบ"
-      >
-        <div className="workflow-sticker" aria-hidden="true">LESS WORK<br />MORE PLAY ↗</div>
-        <div className="workflow-caption">
-          <Sparkles size={14} />จากกฎเล็ก ๆ สู่ผู้ช่วยของคุณ
-        </div>
-        <div className={`workflow-node ${activeStage === 0 ? "stage-spotlight" : ""}`}>
-          <span className="workflow-node-icon">
-            <Layers3 size={20} />
-          </span>
-          <div>
-            <small>01 · เริ่มต้น</small>
-            <strong>รับข้อมูลจากผู้ใช้</strong>
-          </div>
-          <span className="node-dot" />
-        </div>
-        <ArrowDown className="workflow-arrow" size={20} />
-        <div className={`workflow-node workflow-engine ${activeStage === 1 ? "stage-spotlight" : ""}`}>
-          <span className="workflow-node-icon">
-            <Bot size={22} />
-          </span>
-          <div>
-            <small>02 · ประมวลผล</small>
-            <strong>ตรวจเงื่อนไขที่คุณตั้งไว้</strong>
-          </div>
-          <span className="engine-tag">WASM</span>
-        </div>
-        <ArrowDown className="workflow-arrow" size={20} />
-        <div className={`workflow-node ${activeStage === 2 ? "stage-spotlight" : ""}`}>
-          <span className="workflow-node-icon result-icon">
-            <Check size={20} />
-          </span>
-          <div>
-            <small>03 · พร้อมใช้งาน</small>
-            <strong>ส่งคำตอบไปยังเว็บหรือแอป</strong>
-          </div>
-          <ArrowUpRight size={18} />
-        </div>
-        <div className="workflow-explorer" aria-label="เรียนรู้ขั้นตอนการทำงาน"><div className="workflow-tabs">{["รับข้อมูล", "ตรวจเงื่อนไข", "ส่งคำตอบ"].map((label, index) => <button key={label} aria-pressed={activeStage === index} onClick={() => setActiveStage(index)}>{String(index + 1).padStart(2,"0")} · {label}</button>)}</div><p aria-live="polite">{["คุณกำหนดได้ว่าจะให้กรอกอะไร เช่น ยอดสั่งซื้อหรือจังหวัด", "บอทตรวจตามลำดับ และเลือกคำตอบของข้อแรกที่ตรง", "นำคำตอบไปใช้ได้ผ่านลิงก์สาธารณะ เว็บไซต์ หรือ API"][activeStage]}</p></div>
-      </div>
-      <div className="hero-marquee" aria-hidden="true"><div>{[0, 1].map(n => <span key={n}>ไอเดีย ✦ สร้างบอท ✦ ทดลอง ✦ แชร์ให้โลก ✦ CREATE ✦ BUILD ✦ PLAY ✦ </span>)}</div></div>
-    </section>
-    <ColorPlayground />
-    </>
-  );
+export function StudioWelcome({ name, action }: { name?: string; action: ReactNode }) {
+  return <><section className="studio-hero" aria-label="เริ่มต้นใช้งานบอท">
+    <div className="studio-hero-copy">
+      <p className="hero-greeting">{name ? `สวัสดี ${name}` : "ยินดีต้อนรับสู่ WasmBot Studio"}</p>
+      <h1>ภาพรวมบอทของคุณ</h1>
+      <p className="hero-description">ดูสถิติ เปิดบอทที่มีอยู่ หรือสร้างบอทใหม่จากตัวอย่าง</p>
+      <div className="hero-actions">{action}<span><Check size={16} />ไม่ต้องเขียนโค้ด</span></div>
+
+    </div>
+    <CircuitVisual />
+  </section><GalleryWall /></>;
 }
+
+function CircuitVisual() {
+  const [paused, setPaused] = useState(false);
+  return <div className={`circuit-visual${paused ? " is-paused" : ""}`}>
+    <div className="circuit-caption"><span>ภาพร่างหมายเลข 01</span><span>ขั้นตอนการทำงานของบอท</span></div>
+    <div className="hero-pencil"><PencilStudy kind="orbit"/></div>
+    <div className="circuit-stage" aria-hidden="true">
+      <svg viewBox="0 0 440 300" className="circuit-lines" fill="none">
+        <circle cx="220" cy="150" r="112" className="circuit-orbit" />
+        <circle cx="220" cy="150" r="80" className="circuit-orbit inner" />
+        <g className="circuit-tracks">
+          <path d="M15 70H100L155 125H220"/><path d="M15 230H100L155 175H220"/>
+          <path d="M220 125H285L340 70H425"/><path d="M220 175H285L340 230H425"/>
+        </g>
+        <g className="circuit-signals">
+          <path d="M15 70H100L155 125H220"/><path d="M15 230H100L155 175H220"/>
+          <path d="M220 125H285L340 70H425"/><path d="M220 175H285L340 230H425"/>
+        </g>
+        <g className="circuit-satellite"><circle cx="220" cy="38" r="4"/></g>
+        <g className="circuit-points"><circle cx="15" cy="70" r="4"/><circle cx="15" cy="230" r="4"/><circle cx="425" cy="70" r="4"/><circle cx="425" cy="230" r="4"/></g>
+      </svg>
+      <div className="circuit-core"><Layers3 size={34}/><strong>W</strong><span>ENGINE</span></div>
+      <span className="circuit-label input">ข้อมูลเข้า</span><span className="circuit-label output">คำตอบ</span>
+    </div>
+    <div className="circuit-footer"><span>รับข้อมูล <i>→</i> ตรวจเงื่อนไข <i>→</i> ส่งคำตอบ</span><button type="button" onClick={() => setPaused(!paused)} aria-label={paused ? "เล่นภาพเคลื่อนไหว" : "หยุดภาพเคลื่อนไหว"} aria-pressed={paused}>{paused ? <Play size={14}/> : <Pause size={14}/>}</button></div>
+  </div>;
+}
+
 export function GettingStarted({ action }: { action: ReactNode }) {
   return (
     <aside className="getting-started">

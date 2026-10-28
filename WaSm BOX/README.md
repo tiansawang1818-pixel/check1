@@ -160,7 +160,7 @@ supabase functions deploy admin
 supabase functions deploy webhooks
 ```
 
-`supabase/config.toml` declares import maps and bundled WASM static files. Use the CLI with Docker for these WASM deployments; the API-only deploy path does not support the static WASM file in the documented workflow. See [Supabase WASM bundling](https://supabase.com/docs/guides/functions/wasm) and [dependency configuration](https://supabase.com/docs/guides/functions/dependencies).
+`supabase/config.toml` declares import maps and bundled WASM static files. The hosted deployment recorded on 2026-10-05 succeeded with Supabase CLI 2.119.0 without Docker, including the generated WASM artifact; a live execution test verified the uploaded runtime. Docker is still required for the fully local Supabase stack below. Build the artifact before upload and verify a real execution after every runtime deployment. See [Supabase WASM bundling](https://supabase.com/docs/guides/functions/wasm) and [dependency configuration](https://supabase.com/docs/guides/functions/dependencies).
 
 `verify_jwt=false` is intentional: public endpoints and `wbot_live_` tokens must reach the handler. **This does not remove authorization**: every private function verifies Supabase JWT explicitly; admin role and account status are then checked in PostgreSQL. API keys use a separate verification path.
 
@@ -384,7 +384,7 @@ node scripts/preflight.mjs
 เครื่องมือนี้อ่าน `.env` และ `.env.edge` ตรวจ URL, ประเภทคีย์สาธารณะ, ความยาว/รูปแบบของ Edge secrets และไฟล์ WASM โดยไม่แสดงค่าคีย์ ไม่แก้ไขข้อมูล และไม่ติดต่อ Supabase หากใช้ไฟล์ชื่ออื่น ระบุได้ตามลำดับ:
 
 ```sh
-node scripts/preflight.mjs .env.production .env.edge.production
+node scripts/preflight.mjs .env.production .env.edge.production --production
 ```
 
 `FAIL` คือรายการที่ต้องแก้ ส่วน `UNKNOWN` คือยังไม่มีหลักฐานยืนยัน เช่น secrets ที่ตั้งไว้บนเซิร์ฟเวอร์แล้วแต่ไม่มีไฟล์ในเครื่อง เครื่องมือคืน exit code 1 เมื่อพบรายการไม่ผ่านหรือไม่มีไฟล์ Edge secrets; ไม่ใช่คำสั่งสำหรับตัดสิน hosted readiness อัตโนมัติ
@@ -405,3 +405,5 @@ node scripts/preflight.mjs .env.production .env.edge.production
 | `INVALID_RESPONSE` | Server returned unreadable JSON |
 
 The SDK never automatically retries a run. A timeout or cancellation does not undo work already received by the server; inspect execution history before retrying when duplicate execution matters. Keep API keys in server-side code.
+
+โหมด `--production` ตรวจเพิ่มว่า URL หน้าเว็บและ Supabase เป็น HTTPS บนชื่อโดเมน ไม่ใช่ IP หรือ localhost และไม่มี path ต่อท้าย เนื่องจากแอปนี้ใช้เส้นทางจากรากโดเมน การตรวจนี้ไม่เช็ก DNS, ใบรับรอง, การส่งอีเมล หรือค่าบนผู้ให้บริการ hosting จึงต้องทดสอบเว็บจริงหลังติดตั้งด้วย ใช้คำสั่งเดิมที่ไม่มี flag เมื่อตรวจการพัฒนาในเครื่อง

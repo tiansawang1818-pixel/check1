@@ -32,6 +32,15 @@ import {
   Panel,
 } from "../components/ui";
 import type { Bot } from "../../../supabase/functions/_shared/schema";
+
+export const categoryLabel = (category: string) => ({
+  General: "ทั่วไป",
+  Education: "การศึกษา",
+  Commerce: "การค้า",
+  Validation: "ตรวจสอบข้อมูล",
+  Automation: "งานอัตโนมัติ",
+  Support: "บริการช่วยเหลือ",
+} as Record<string, string>)[category] || category;
 export function UsageChart({ daily }: { daily: any[] }) {
   const [range, setRange] = useState(7);
   return (
@@ -55,11 +64,11 @@ export function UsageChart({ daily }: { daily: any[] }) {
           >
             <defs>
               <linearGradient id="usageFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#6366f1" stopOpacity={.25} />
-                <stop offset="100%" stopColor="#6366f1" stopOpacity={0} />
+                <stop offset="0%" stopColor="var(--ink)" stopOpacity={.25} />
+                <stop offset="100%" stopColor="var(--ink)" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid vertical={false} stroke="#edf0f6" />
+            <CartesianGrid vertical={false} stroke="#e5e5e5" />
             <XAxis
               dataKey="day"
               tickFormatter={(x) =>
@@ -76,14 +85,17 @@ export function UsageChart({ daily }: { daily: any[] }) {
             <Area
               type="monotone"
               dataKey="runs"
-              stroke="#6366f1"
+              name="จำนวนการรัน"
+              stroke="var(--ink)"
               strokeWidth={2.5}
               fill="url(#usageFill)"
             />
             <Area
               type="monotone"
               dataKey="failures"
-              stroke="#f97316"
+              strokeDasharray="4 4"
+              name="ไม่สำเร็จ"
+              stroke="#888888"
               fill="transparent"
             />
           </AreaChart>
@@ -118,13 +130,22 @@ export function BotCard({ bot }: { bot: Bot & { bot_deployments?: any[] } }) {
         </span>
       </div>
       <div className="bot-card-footer">
-        <span>{bot.category}</span>
+        <span>{categoryLabel(bot.category)}</span>
         <Link to={`/bots/${bot.id}`}>
           เปิดบอท <ArrowUpRight size={16} />
         </Link>
       </div>
     </article>
   );
+}
+function NewBotCard() {
+  return <Link to="/bots/new" className="new-bot-sheet">
+    <span className="new-bot-mark" aria-hidden="true"><Plus size={28}/></span>
+    <span className="section-overline">บอทใหม่</span>
+    <strong>สร้างบอท</strong>
+    <p>เริ่มจากตัวอย่างตัดเกรดหรือค่าจัดส่ง แล้วปรับเงื่อนไขให้เหมาะกับงานของคุณ</p>
+    <span className="new-bot-action">เริ่มสร้างบอท <ArrowUpRight size={16}/></span>
+  </Link>;
 }
 export function Dashboard() {
   const { profile } = useAuth();
@@ -158,7 +179,7 @@ export function Dashboard() {
       <div className="section-heading">
         <div>
           <span className="section-overline">ภาพรวมพื้นที่ทำงาน</span>
-          <h2>ทุกความเคลื่อนไหว ในที่เดียว</h2>
+          <h2>สถิติการใช้งาน</h2>
         </div>
         <span className="live-data-label">ข้อมูลจากการใช้งานจริง</span>
       </div>
@@ -215,11 +236,12 @@ export function Dashboard() {
             {bots.data.bots.slice(0, 3).map((b: Bot) => (
               <BotCard key={b.id} bot={b} />
             ))}
+            {bots.data.bots.length < 3 && <NewBotCard />}
           </div>
         )
         : (
           <Panel>
-            <Empty title="พื้นที่นี้รอบอทตัวแรกของคุณ">
+            <Empty title="ยังไม่มีบอท">
               <p>เริ่มจากเรื่องใกล้ตัว แล้วให้บอทช่วยตอบตามเงื่อนไข</p>
               <Link to="/bots/new" className="primary">
                 <Plus size={16} />สร้างบอทตัวแรก
@@ -238,8 +260,7 @@ export function Dashboard() {
         <div>
           <strong>สร้างครั้งเดียว ใช้งานได้หลายช่องทาง</strong>
           <p>
-            Publish your bot to get a public page, API endpoint, and embeddable
-            widget.
+            เผยแพร่บอทเพื่อแชร์ลิงก์ให้คนอื่นใช้ หรือเชื่อมต่อกับเว็บไซต์ของคุณ
           </p>
         </div>
         <Link to="/developer">
@@ -257,7 +278,7 @@ export function Bots() {
       <Heading
         eyebrow="ผู้ช่วยที่คุณสร้างเอง"
         title="บอทของฉัน"
-        description="ดูแลทุกบอท ตั้งแต่ไอเดียแรกไปจนถึงเวอร์ชันที่พร้อมใช้งาน"
+        description="สร้าง แก้ไข และทดสอบบอทของคุณ"
       >
         <Link className="primary" to="/bots/new">
           <Plus size={18} />สร้างบอท
@@ -300,7 +321,7 @@ export function Bots() {
                 </div>
               )
               : (
-                <Empty title="ยังไม่มีบอทในพื้นที่นี้">
+                <Empty title="ยังไม่มีบอท">
                   <Link className="primary" to="/bots/new">
                     สร้างบอทแรกของคุณ
                   </Link>
@@ -349,7 +370,12 @@ export function ExecutionTable(
                 </Link>
               </td>
               <td>
-                <span className="source">{r.source.replaceAll("_", " ")}</span>
+                <span className="source">{{
+                  DASHBOARD: "หน้าทดสอบ",
+                  PUBLIC_PAGE: "หน้าสาธารณะ",
+                  API: "API",
+                  EMBED: "เว็บไซต์ที่ฝังบอท",
+                }[r.source as string] || r.source.replaceAll("_", " ")}</span>
               </td>
               <td>
                 <Badge>{r.status}</Badge>

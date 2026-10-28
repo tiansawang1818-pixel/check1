@@ -15,8 +15,12 @@ import { Builder } from "./components/Builder";
 import { Badge, Heading, Metric, Panel } from "./components/ui";
 import { ToastProvider, useToast } from "./lib/context";
 import "./styles.css";
-import "./color-explosion.css";
-import { ColorExperience } from "./components/ColorExperience";
+import "./monochrome.css";
+import "./atelier.css";
+import "./gallery.css";
+import "./manuscript.css";
+import "./atelier-room.css";
+
 import { StudioTools } from "./components/StudioTools";
 import { GettingStarted, StudioWelcome } from "./components/StudioWelcome";
 
@@ -422,7 +426,7 @@ function Preview() {
 const previewRoot = createRoot(document.getElementById("root")!);
 previewRoot.render(
   <ToastProvider>
-    <ColorExperience /><Preview />
+    <Preview />
   </ToastProvider>,
 );
 if (import.meta.hot) import.meta.hot.dispose(() => previewRoot.unmount());

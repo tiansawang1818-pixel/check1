@@ -68,21 +68,49 @@ export const InputSchema = z.object({
     }
   });
 });
+const ConditionSchema = z.object({
+  field: z.string().max(64),
+  operator: z.enum(operators),
+  value: jsonValue.optional(),
+}).strict();
+export type ConditionGroup = {
+  conditions: z.infer<typeof ConditionSchema>[];
+  match: "AND" | "OR";
+  groups?: ConditionGroup[];
+};
+export const MAX_GROUP_DEPTH = 4;
+export const MAX_RULE_CONDITIONS = 100;
+export function groupConditions(group: ConditionGroup): z.infer<typeof ConditionSchema>[] {
+  return [...group.conditions, ...(group.groups ?? []).flatMap(groupConditions)];
+}
+// Bound recursion structurally, before parsing arbitrary user JSON.
+function groupShape(depth: number): {
+  conditions: ReturnType<typeof conditionList>;
+  match: z.ZodDefault<z.ZodEnum<["AND", "OR"]>>;
+  groups: z.ZodOptional<z.ZodArray<z.ZodType<ConditionGroup>>>;
+} {
+  return {
+    conditions: conditionList(),
+    match: z.enum(["AND", "OR"]).default("AND"),
+    groups: z.array(depth < MAX_GROUP_DEPTH ? groupSchema(depth + 1) : z.never())
+      .max(depth < MAX_GROUP_DEPTH ? 20 : 0).optional(),
+  };
+}
+function conditionList() { return z.array(ConditionSchema).max(20); }
+function validGroup(group: ConditionGroup) {
+  return group.conditions.length + (group.groups?.length ?? 0) > 0;
+}
+function groupSchema(depth: number): z.ZodType<ConditionGroup> {
+  return z.object(groupShape(depth)).strict().refine(validGroup, "Condition group cannot be empty") as z.ZodType<ConditionGroup>;
+}
 export const RuleSchema = z.object({
   version: z.literal(1),
-  rules: z.array(
-    z.object({
-      conditions: z.array(
-        z.object({
-          field: z.string().max(64),
-          operator: z.enum(operators),
-          value: jsonValue.optional(),
-        }).strict(),
-      ).min(1).max(20),
-      match: z.enum(["AND", "OR"]).default("AND"),
-      output: jsonValue,
-    }).strict(),
-  ).max(100),
+  rules: z.array(z.object({
+    ...groupShape(0),
+    output: jsonValue,
+  }).strict().refine(validGroup, "Condition group cannot be empty")
+    .refine(group => groupConditions(group).length <= MAX_RULE_CONDITIONS, "Maximum 100 conditions per rule"))
+    .max(100),
   defaultOutput: jsonValue,
 }).strict();
 export const WidgetSchema = z.object({
@@ -140,7 +168,7 @@ export const BotSchema = z.object({
   }
   const names = new Set(b.input_schema.fields.map((f) => f.name));
   for (const r of b.rule_definition.rules) {
-    for (const cond of r.conditions) {
+    for (const cond of groupConditions(r)) {
       if (!names.has(cond.field)) {
         c.addIssue({ code: "custom", message: `Unknown field: ${cond.field}` });
       }

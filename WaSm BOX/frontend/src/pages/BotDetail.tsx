@@ -22,7 +22,7 @@ import {
   Metric,
   Panel,
 } from "../components/ui";
-import { ExecutionTable, UsageChart } from "./Dashboard";
+import { categoryLabel, ExecutionTable, UsageChart } from "./Dashboard";
 const draftKeys = [
   "name",
   "description",
@@ -47,8 +47,8 @@ export function NewBot() {
     <>
       <Heading
         eyebrow="สร้างบอทได้โดยไม่ต้องเขียนโค้ด"
-        title="สร้างบอทของคุณ"
-        description="เลือกตัวอย่าง กรอกข้อมูล และตั้งเงื่อนไขง่าย ๆ แล้วไปทดลองใช้งานได้เลย"
+        title="สร้างบอท"
+        description="กำหนดชื่อ ข้อมูลที่รับ และเงื่อนไขการตอบกลับ"
       />
       <Builder
         steps
@@ -61,6 +61,10 @@ export function NewBot() {
   );
 }
 export function BotDetail() {
+  const { id } = useParams();
+  return <BotDetailPage key={id} />;
+}
+function BotDetailPage() {
   const { id, tab = "overview" } = useParams();
   const { data, loading, error, reload } = useResource(`studio?id=${id}`);
   const { busy, run } = useAction();
@@ -72,14 +76,14 @@ export function BotDetail() {
   return (
     <>
       <div className="breadcrumbs">
-        <Link to="/bots">My bots</Link>
+        <Link to="/bots">บอทของฉัน</Link>
         <span>/</span>
         {bot.name}
       </div>
       <Heading title={bot.name} description={bot.description}>
         <Badge>{bot.status}</Badge>
         <Link className="secondary" to={`/bots/${id}/test`}>
-          <Play size={16} />Test bot
+          <Play size={16} />ทดสอบบอท
         </Link>
         <button
           className="primary"
@@ -89,14 +93,14 @@ export function BotDetail() {
               await api(`studio?id=${id}`, "POST", { action: "publish" });
               setLive(true);
               reload();
-            }, "Published successfully.")}
+            }, "เผยแพร่เรียบร้อยแล้ว")}
         >
           <Rocket size={16} />
           {busy
-            ? "Publishing…"
+            ? "กำลังเผยแพร่…"
             : current
-            ? "Publish new version"
-            : "Publish bot"}
+            ? "เผยแพร่เวอร์ชันใหม่"
+            : "เผยแพร่บอท"}
         </button>
       </Heading>
       {live && (
@@ -108,10 +112,9 @@ export function BotDetail() {
         >
           <section className="modal">
             <Check className="success-icon" size={36} />
-            <h2 id="live-title">Your bot is live!</h2>
+            <h2 id="live-title">เผยแพร่บอทแล้ว!</h2>
             <p>
-              Versioned logic is ready. Enable the channels you want to share in
-              Deploy.
+              สร้างเวอร์ชันใช้งานจริงแล้ว เลือกเปิดช่องทางที่ต้องการในหน้าการเผยแพร่
             </p>
             <Code>{`${appUrl}/b/${bot.public_slug}`}</Code>
             <div className="actions">
@@ -148,7 +151,7 @@ export function BotDetail() {
             to={`/bots/${id}/${t}`}
             className={() => tab === t ? "active" : ""}
           >
-            {t[0].toUpperCase() + t.slice(1)}
+            {{ overview: "ภาพรวม", builder: "แก้ไขบอท", test: "ทดสอบ", deploy: "เผยแพร่", executions: "ประวัติการรัน", analytics: "สถิติ", settings: "ตั้งค่า" }[t]}
           </NavLink>
         ))}
       </nav>
@@ -175,42 +178,42 @@ export function BotDetail() {
         : (
           <>
             <div className="metrics">
-              <Metric label="Total executions" value={bot.run_count} />
-              <Metric label="Successful" value={bot.success_count} />
-              <Metric label="Failed" value={bot.failure_count} />
+              <Metric label="การทำงานทั้งหมด" value={bot.run_count} />
+              <Metric label="สำเร็จ" value={bot.success_count} />
+              <Metric label="ผิดพลาด" value={bot.failure_count} />
               <Metric
-                label="Production version"
-                value={current ? `v${current.version}` : "Not published"}
+                label="เวอร์ชันใช้งานจริง"
+                value={current ? `v${current.version}` : "ยังไม่เผยแพร่"}
               />
             </div>
             <div className="two-col">
-              <Panel title="Bot configuration">
+              <Panel title="ข้อมูลบอท">
                 <dl>
-                  <dt>Category</dt>
-                  <dd>{bot.category}</dd>
-                  <dt>Input fields</dt>
+                  <dt>หมวดหมู่</dt>
+                  <dd>{categoryLabel(bot.category)}</dd>
+                  <dt>ช่องข้อมูลรับเข้า</dt>
                   <dd>{bot.input_schema.fields.length}</dd>
-                  <dt>Rules</dt>
+                  <dt>เงื่อนไข</dt>
                   <dd>{bot.rule_definition.rules.length}</dd>
-                  <dt>Updated</dt>
+                  <dt>แก้ไขล่าสุด</dt>
                   <dd>{formatDate(bot.updated_at)}</dd>
                 </dl>
                 <Link className="secondary" to={`/bots/${id}/builder`}>
-                  Edit draft
+                  แก้ไขฉบับร่าง
                 </Link>
               </Panel>
-              <Panel title="Deployment history">
+              <Panel title="ประวัติการเผยแพร่">
                 {data.deployments.length
                   ? data.deployments.map((d: any) => (
                     <div className="list-row" key={d.id}>
-                      <strong>Version {d.version}</strong>
+                      <strong>เวอร์ชัน {d.version}</strong>
                       <span>{formatDate(d.deployed_at)}</span>
                       <Badge>{d.active ? "LIVE" : "ARCHIVED"}</Badge>
                     </div>
                   ))
                   : (
-                    <Empty title="No deployments yet">
-                      <p>Test your draft, then publish its first version.</p>
+                    <Empty title="ยังไม่มีเวอร์ชันที่เผยแพร่">
+                      <p>ทดลองฉบับร่างให้เรียบร้อย แล้วเผยแพร่เวอร์ชันแรก</p>
                     </Empty>
                   )}
               </Panel>
@@ -227,9 +230,9 @@ export function Playground(
   const [result, setResult] = useState<any>(null);
   return (
     <div className="two-col">
-      <Panel title="Test input">
+      <Panel title="ข้อมูลสำหรับทดสอบ">
         <p className="muted">
-          Runs your saved draft through the Edge Function and Rust WASM engine.
+          ทดลองใช้ฉบับร่างที่บันทึกไว้ โดยไม่เปลี่ยนเวอร์ชันที่เผยแพร่
         </p>
         <BotForm
           fields={bot.input_schema.fields}
@@ -239,28 +242,28 @@ export function Playground(
               await api("run-bot", "POST", { botId: bot.id, input, admin }),
             );
           }}
-          buttonText="Run test"
+          buttonText="เริ่มทดสอบ"
         />
       </Panel>
-      <Panel title="Output">
+      <Panel title="ผลลัพธ์">
         {result
           ? (
             <>
               <Badge>SUCCESS</Badge>
               <Output value={result.output} type={bot.output_schema.type} />
               <dl>
-                <dt>Execution time</dt>
+                <dt>เวลาประมวลผล</dt>
                 <dd>{result.executionTimeMs} ms</dd>
-                <dt>WASM memory</dt>
+                <dt>หน่วยความจำ WASM</dt>
                 <dd>{(result.memoryUsed / 1048576).toFixed(2)} MiB</dd>
-                <dt>Request ID</dt>
+                <dt>รหัสคำขอ</dt>
                 <dd className="mono">{result.requestId}</dd>
               </dl>
             </>
           )
           : (
-            <Empty title="Ready when you are">
-              <p>Enter your input and run a test.</p>
+            <Empty title="พร้อมให้คุณทดลองแล้ว">
+              <p>กรอกข้อมูลแล้วกดเริ่มทดสอบ</p>
             </Empty>
           )}
       </Panel>
@@ -277,39 +280,39 @@ export function Analytics({ botId }: { botId?: string }) {
   return (
     <>
       <div className="metrics">
-        <Metric label="Today" value={t.today} />
-        <Metric label="Last 7 days" value={t.week} />
-        <Metric label="Last 30 days" value={t.month} />
-        <Metric label="Total runs" value={t.total} />
+        <Metric label="วันนี้" value={t.today} />
+        <Metric label="7 วันที่ผ่านมา" value={t.week} />
+        <Metric label="30 วันที่ผ่านมา" value={t.month} />
+        <Metric label="การทำงานทั้งหมด" value={t.total} />
         <Metric
-          label="Success rate"
+          label="อัตราสำเร็จ"
           value={t.total ? `${(100 * t.success / t.total).toFixed(1)}%` : "—"}
         />
         <Metric
-          label="Failure rate"
+          label="อัตราผิดพลาด"
           value={t.total ? `${(100 * t.failed / t.total).toFixed(1)}%` : "—"}
         />
         <Metric
-          label="Average duration"
+          label="เวลาประมวลผลเฉลี่ย"
           value={`${Number(t.average_ms).toFixed(1)} ms`}
         />
         <Metric
-          label="Public / API / Embed"
+          label="ลิงก์ / API / ฝังเว็บ"
           value={`${t.public} / ${t.api} / ${t.embed}`}
         />
       </div>
-      <Panel title="Usage">
+      <Panel title="การใช้งาน">
         <UsageChart daily={a.daily} />
       </Panel>
-      <Panel title="Top errors">
+      <Panel title="ข้อผิดพลาดที่พบบ่อย">
         {a.errors.length
           ? a.errors.map((e: any) => (
             <div className="list-row" key={e.error_message}>
-              <span>{e.error_message || "Unknown error"}</span>
+              <span>{e.error_message || "ไม่ทราบสาเหตุ"}</span>
               <Badge>{e.count}</Badge>
             </div>
           ))
-          : <Empty title="No errors recorded" />}
+          : <Empty title="ยังไม่พบข้อผิดพลาด" />}
       </Panel>
     </>
   );
@@ -319,7 +322,7 @@ function BotExecutions({ id }: { id: string }) {
     `studio?resource=executions&bot=${id}`,
   );
   return (
-    <Panel title="Recent executions">
+    <Panel title="การทำงานล่าสุด">
       {loading
         ? <Loading />
         : error
@@ -352,6 +355,7 @@ function Deploy(
   },
 ) {
   const [draft, setDraft] = useState(toDraft(bot)),
+    [domains, setDomains] = useState(bot.allowed_domains.join(", ")),
     [example, setExample] = useState<"curl" | "javascript" | "python">("curl");
   const { busy, run } = useAction();
   const input = Object.fromEntries(
@@ -374,38 +378,56 @@ function Deploy(
       `<iframe src="${appUrl}/embed/${bot.public_slug}" width="400" height="500" title="WasmBot widget" style="border:0;border-radius:16px" loading="lazy"></iframe>`;
   return (
     <>
+      <Panel title="ให้คนอื่นใช้บอทของคุณใน 3 ขั้นตอน">
+        <ol className="publish-steps">
+          <li><Link to={`/bots/${bot.id}/test`}>ทดลองกรอกข้อมูล</Link> แล้วตรวจว่าคำตอบถูกต้อง</li>
+          <li>กด “เผยแพร่บอท” ด้านบน เพื่อเลือกฉบับที่พร้อมใช้งาน</li>
+          <li>เปิด “ให้ผู้อื่นใช้ผ่านลิงก์” แล้วกดบันทึก จากนั้นคัดลอกลิงก์ส่งให้ผู้ใช้งาน</li>
+        </ol>
+        <p className="muted">การใช้งานผ่านลิงก์ไม่ต้องเขียนโค้ดหรือตั้งค่ากุญแจ API</p>
+      </Panel>
       <div className="two-col">
-        <Panel title="Production deployment">
-          <Badge>{deployment ? "LIVE" : "NOT PUBLISHED"}</Badge>
+        <Panel title="เวอร์ชันสำหรับใช้งานจริง">
+          <Badge>{deployment ? "LIVE" : "NOT_PUBLISHED"}</Badge>
           <h3>
             {deployment
-              ? `Version ${deployment.version}`
-              : "Publish to create a production version"}
+              ? `เวอร์ชัน ${deployment.version}`
+              : "ยังไม่ได้เผยแพร่บอท"}
           </h3>
           <p className="muted">
             {deployment
-              ? `Published ${formatDate(deployment.deployed_at)}`
-              : "Your saved draft can be tested before publishing."}
+              ? `เผยแพร่เมื่อ ${formatDate(deployment.deployed_at)}`
+              : "คุณทดลองใช้ฉบับร่างได้ก่อนเปิดให้ผู้อื่นใช้งาน"}
           </p>
-          <p>Editing the builder keeps this published version unchanged.</p>
+          <p>เมื่อแก้ไขบอท ให้กดเผยแพร่เวอร์ชันใหม่อีกครั้ง ผู้ใช้จึงจะเห็นการเปลี่ยนแปลง</p>
         </Panel>
-        <Panel title="Access channels">
+        <Panel title="ช่องทางใช้งาน">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               void run(async () => {
-                await api(`studio?id=${bot.id}`, "PUT", BotSchema.parse(draft));
+                await api(`studio?id=${bot.id}`, "PUT", BotSchema.parse({
+                  ...draft,
+                  allowed_domains: domains.split(/[,\n]/).map((domain) => domain.trim()).filter(Boolean),
+                }));
                 reload();
-              }, "Access settings saved.");
+              }, "บันทึกช่องทางใช้งานแล้ว");
             }}
           >
+            <label className="toggle-row">
+              ให้ผู้อื่นใช้ผ่านลิงก์
+              <input type="checkbox" checked={draft.allow_public_access}
+                onChange={(e) => setDraft({ ...draft, allow_public_access: e.target.checked })} />
+            </label>
+            <p className="muted">เมื่อเปิด ทุกคนที่มีลิงก์สามารถกรอกข้อมูลและรันบอทได้</p>
+            <details>
+              <summary>ตัวเลือกขั้นสูง: เชื่อมแอปหรือฝังในเว็บไซต์</summary>
             {([
-              "allow_public_access",
               "allow_api_access",
               "allow_embed",
             ] as const).map((k, i) => (
               <label className="toggle-row" key={k}>
-                {["Public page", "REST API", "Embed widget"][i]}
+                {["เชื่อมต่อแอปผ่าน API", "ฝังบอทในเว็บไซต์"][i]}
                 <input
                   type="checkbox"
                   checked={draft[k]}
@@ -415,30 +437,24 @@ function Deploy(
               </label>
             ))}
             <label>
-              Allowed embed domains<textarea
+              โดเมนที่อนุญาตให้ฝังบอท<textarea
                 placeholder="example.com, shop.example.com"
-                value={draft.allowed_domains.join(", ")}
-                onChange={(e) =>
-                  setDraft({
-                    ...draft,
-                    allowed_domains: e.target.value.split(",").map((s) =>
-                      s.trim()
-                    ).filter(Boolean),
-                  })}
+                value={domains}
+                onChange={(e) => setDomains(e.target.value)}
               />
               <small>
-                Exact hosts, including port when needed. Empty allows all
-                domains.
+                คั่นแต่ละโดเมนด้วยจุลภาคหรือขึ้นบรรทัดใหม่ ระบุพอร์ตหากจำเป็น เว้นว่างเพื่ออนุญาตทุกโดเมน
               </small>
             </label>
+            </details>
             <button className="primary" disabled={busy}>
-              <Save size={16} />Save access
+              <Save size={16} />บันทึกช่องทางใช้งาน
             </button>
           </form>
         </Panel>
       </div>
       <Panel
-        title="Public page"
+        title="ลิงก์สำหรับผู้ใช้งาน"
         action={bot.allow_public_access && deployment
           ? (
             <a
@@ -447,24 +463,28 @@ function Deploy(
               rel="noreferrer"
               href={publicUrl}
             >
-              Open bot<ExternalLink size={16} />
+              เปิดหน้าบอท<ExternalLink size={16} />
             </a>
           )
           : undefined}
       >
-        <Code>{publicUrl}</Code>
+        {bot.allow_public_access && deployment
+          ? <><Code>{publicUrl}</Code>{["localhost", "127.0.0.1", "[::1]"].includes(new URL(appUrl).hostname) &&
+            <p className="notice">ขณะนี้เว็บเปิดบนเครื่องของคุณ ลิงก์นี้ยังส่งให้คนอื่นเปิดจากเครื่องอื่นไม่ได้ ต้องนำเว็บขึ้นออนไลน์ก่อน</p>}</>
+          : <p>ลิงก์จะพร้อมเมื่อเผยแพร่บอท และเปิดให้ผู้อื่นใช้ผ่านลิงก์พร้อมบันทึกแล้ว</p>}
       </Panel>
+      <details>
+        <summary>สำหรับผู้พัฒนา: ตัวอย่างโค้ด API และการฝังบอท</summary>
       <Panel
         title="REST API"
         action={
           <Link to="/developer/api-keys" className="text-link">
-            Manage API keys ↗
+            จัดการกุญแจ API ↗
           </Link>
         }
       >
         <p className="muted">
-          Use your API key from a trusted server. Never expose it in a public
-          website.
+          ใช้กุญแจ API บนเซิร์ฟเวอร์ที่เชื่อถือได้ และห้ามใส่กุญแจไว้ในเว็บไซต์สาธารณะ
         </p>
         <div className="tabs">
           {(["curl", "javascript", "python"] as const).map((t) => (
@@ -479,16 +499,16 @@ function Deploy(
         </div>
         <Code>{code[example]}</Code>
       </Panel>
-      <Panel title="Embed widget">
+      <Panel title="โค้ดฝังบอทในเว็บไซต์">
         <Code>{embed}</Code>
         <Code>
           {`<script src="${appUrl}/widget.js" data-bot="${bot.public_slug}" data-theme="light"></script>`}
         </Code>
         <p className="muted">
-          The script supports parent-origin verification and automatic height
-          updates.
+          สคริปต์ตรวจสอบโดเมนต้นทางและปรับความสูงให้พอดีโดยอัตโนมัติ
         </p>
       </Panel>
+      </details>
     </>
   );
 }
@@ -498,31 +518,31 @@ function BotSettings({ bot, reload }: { bot: Bot; reload: () => void }) {
   const { run, busy } = useAction();
   return (
     <>
-      <Panel title="Bot settings">
+      <Panel title="ตั้งค่าบอท">
         <form
           onSubmit={(e) => {
             e.preventDefault();
             void run(async () => {
               await api(`studio?id=${bot.id}`, "PUT", BotSchema.parse(draft));
               reload();
-            }, "Settings saved.");
+            }, "บันทึกการตั้งค่าแล้ว");
           }}
         >
           <label>
-            Name<input
+            ชื่อบอท<input
               value={draft.name}
               onChange={(e) => setDraft({ ...draft, name: e.target.value })}
             />
           </label>
           <label>
-            Description<textarea
+            คำอธิบาย<textarea
               value={draft.description}
               onChange={(e) =>
                 setDraft({ ...draft, description: e.target.value })}
             />
           </label>
           <label>
-            Requests per minute (per visitor or API key)<input
+            จำนวนครั้งที่ใช้ได้ต่อนาที (ต่อผู้ใช้)<input
               type="number"
               min={1}
               max={1000}
@@ -530,13 +550,13 @@ function BotSettings({ bot, reload }: { bot: Bot; reload: () => void }) {
               onChange={(e) =>
                 setDraft({ ...draft, rate_limit: Number(e.target.value) })}
             />
-            <small>The system rate limit also applies.</small>
+            <small>ใช้ป้องกันการเรียกบอทถี่เกินไป โดยยังมีขีดจำกัดรวมของระบบ</small>
           </label>
-          <h3>Widget appearance</h3>
+          <h3>หน้าตาที่ผู้ใช้งานจะเห็น</h3>
           <div className="form-grid">
             {(["title", "buttonText", "placeholder"] as const).map((k) => (
               <label key={k}>
-                {k}
+                {{ title: "หัวข้อที่แสดง", buttonText: "ข้อความบนปุ่มรัน", placeholder: "ตัวอย่างในช่องกรอก" }[k]}
                 <input
                   value={draft.widget[k]}
                   onChange={(e) =>
@@ -548,7 +568,7 @@ function BotSettings({ bot, reload }: { bot: Bot; reload: () => void }) {
               </label>
             ))}
             <label>
-              Theme<select
+              โทนสี<select
                 value={draft.widget.theme}
                 onChange={(e) =>
                   setDraft({
@@ -556,9 +576,9 @@ function BotSettings({ bot, reload }: { bot: Bot; reload: () => void }) {
                     widget: { ...draft.widget, theme: e.target.value as any },
                   })}
               >
-                <option>light</option>
-                <option>dark</option>
-                <option>system</option>
+                <option value="light">สว่าง</option>
+                <option value="dark">มืด</option>
+                <option value="system">ตามอุปกรณ์</option>
               </select>
             </label>
             {(["showBotName", "showPoweredBy"] as const).map((k) => (
@@ -573,18 +593,18 @@ function BotSettings({ bot, reload }: { bot: Bot; reload: () => void }) {
                     })}
                 />
                 {k === "showBotName"
-                  ? "Show bot name"
-                  : "Show Powered by WasmBot"}
+                  ? "แสดงชื่อบอท"
+                  : "แสดงเครดิต WasmBot"}
               </label>
             ))}
           </div>
-          <button className="primary" disabled={busy}>Save settings</button>
+          <button className="primary" disabled={busy}>บันทึกการตั้งค่า</button>
         </form>
       </Panel>
-      <WebhookSettings id={bot.id} />
-      <Panel title="Bot lifecycle">
+      <details><summary>ขั้นสูง: ส่งผลลัพธ์ไปยังระบบอื่น (Webhook)</summary><WebhookSettings id={bot.id} /></details>
+      <Panel title="พักหรือหยุดให้บริการบอท">
         <p className="muted">
-          Deleted bots retain their execution and audit history.
+          เมื่อลบบอท ประวัติการรันยังถูกเก็บไว้ แต่ไม่สามารถกู้คืนบอทจากหน้านี้ได้
         </p>
         <div className="actions">
           <button
@@ -593,7 +613,7 @@ function BotSettings({ bot, reload }: { bot: Bot; reload: () => void }) {
             onClick={() => {
               if (
                 confirm(
-                  `${bot.status === "DISABLED" ? "Enable" : "Pause"} this bot?`,
+                  `${bot.status === "DISABLED" ? "เปิดใช้งาน" : "พักการทำงาน"}บอทนี้?`,
                 )
               ) {
                 void run(async () => {
@@ -606,7 +626,7 @@ function BotSettings({ bot, reload }: { bot: Bot; reload: () => void }) {
               }
             }}
           >
-            {bot.status === "DISABLED" ? "Enable bot" : "Pause bot"}
+            {bot.status === "DISABLED" ? "เปิดใช้งานบอท" : "พักการทำงาน"}
           </button>
           <button
             className="secondary"
@@ -614,7 +634,7 @@ function BotSettings({ bot, reload }: { bot: Bot; reload: () => void }) {
             onClick={() => {
               if (
                 confirm(
-                  "Unpublish this bot? Public, API and embed calls will stop.",
+                  "ยกเลิกการเผยแพร่? ผู้ใช้จะรันบอทผ่านลิงก์ API หรือเว็บไซต์ที่ฝังบอทไม่ได้",
                 )
               ) {
                 void run(async () => {
@@ -626,7 +646,7 @@ function BotSettings({ bot, reload }: { bot: Bot; reload: () => void }) {
               }
             }}
           >
-            Unpublish
+            ยกเลิกการเผยแพร่
           </button>
           <button
             className="danger"
@@ -634,7 +654,7 @@ function BotSettings({ bot, reload }: { bot: Bot; reload: () => void }) {
             onClick={() => {
               if (
                 confirm(
-                  `Delete ${bot.name}? This cannot be undone from the dashboard.`,
+                  `ลบบอท ${bot.name}? คุณจะกู้คืนบอทจากหน้านี้ไม่ได้`,
                 )
               ) {
                 void run(async () => {
@@ -644,7 +664,7 @@ function BotSettings({ bot, reload }: { bot: Bot; reload: () => void }) {
               }
             }}
           >
-            Delete bot
+            ลบบอท
           </button>
         </div>
       </Panel>
@@ -658,7 +678,7 @@ function WebhookSettings({ id }: { id: string }) {
     [secret, setSecret] = useState(""),
     [enabled, setEnabled] = useState<boolean | null>(null);
   return (
-    <Panel title="Output webhook">
+    <Panel title="ส่งผลลัพธ์ด้วย Webhook">
       {loading
         ? <Loading />
         : error
@@ -666,8 +686,8 @@ function WebhookSettings({ id }: { id: string }) {
         : (
           <>
             <p className="muted">
-              Send successful production results to an approved HTTPS
-              destination. Requests are signed and retried up to three attempts.
+              ส่งผลลัพธ์ที่สำเร็จไปยังปลายทาง HTTPS ที่อนุญาต คำขอจะมีลายเซ็น
+              และลองส่งซ้ำได้สูงสุดสามครั้ง
             </p>
             <form
               onSubmit={(e) => {
@@ -680,7 +700,7 @@ function WebhookSettings({ id }: { id: string }) {
                   });
                   setSecret("");
                   reload();
-                }, "Webhook saved.");
+                }, "บันทึก Webhook แล้ว");
               }}
             >
               <label>
@@ -692,7 +712,7 @@ function WebhookSettings({ id }: { id: string }) {
                 />
               </label>
               <label>
-                Signing secret<input
+                รหัสลับสำหรับลงลายเซ็น<input
                   type="password"
                   autoComplete="new-password"
                   minLength={16}
@@ -700,8 +720,8 @@ function WebhookSettings({ id }: { id: string }) {
                   value={secret}
                   onChange={(e) => setSecret(e.target.value)}
                   placeholder={data.webhook
-                    ? "Leave blank to keep current secret"
-                    : "At least 16 characters"}
+                    ? "เว้นว่างเพื่อใช้รหัสเดิม"
+                    : "อย่างน้อย 16 ตัวอักษร"}
                 />
               </label>
               <label className="check-label">
@@ -709,11 +729,11 @@ function WebhookSettings({ id }: { id: string }) {
                   type="checkbox"
                   checked={enabled ?? data.webhook?.enabled ?? false}
                   onChange={(e) => setEnabled(e.target.checked)}
-                />Enable webhook
+                />เปิดใช้งาน Webhook
               </label>
               <div className="actions">
                 <button className="primary" disabled={busy}>
-                  Save webhook
+                  บันทึก Webhook
                 </button>
                 <button
                   type="button"
@@ -723,15 +743,15 @@ function WebhookSettings({ id }: { id: string }) {
                     void run(async () => {
                       await api(`webhooks?bot=${id}&action=retry`, "POST", {});
                       reload();
-                    }, "Due deliveries processed.")}
+                    }, "ประมวลผลรายการที่รอส่งซ้ำแล้ว")}
                 >
-                  Process due retries
+                  ส่งรายการที่ค้างอีกครั้ง
                 </button>
               </div>
             </form>
             {data.deliveries.length > 0 && (
               <details>
-                <summary>Recent deliveries</summary>
+                <summary>รายการส่งล่าสุด</summary>
                 <Json value={data.deliveries} />
               </details>
             )}

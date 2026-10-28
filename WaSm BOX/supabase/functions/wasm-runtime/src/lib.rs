@@ -6,7 +6,23 @@ const MAX_BYTES: usize = 65_536;
 struct Condition {field:String,operator:String,#[serde(default)]value:Value}
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Rule {conditions:Vec<Condition>,#[serde(default="and",rename="match")] mode:String,output:Value}
+struct Rule {conditions:Vec<Condition>,#[serde(default="and",rename="match")] mode:String,#[serde(default)]groups:Vec<Group>,output:Value}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct Group {conditions:Vec<Condition>,#[serde(default="and",rename="match")] mode:String,#[serde(default)]groups:Vec<Group>}
+fn validate_group(conditions:&[Condition], groups:&[Group], mode:&str, depth:usize, count:&mut usize, names:&std::collections::HashSet<&str>, input:&Value)->Result<(),String>{
+ if depth>4 || conditions.len()>20 || groups.len()>20 || conditions.len()+groups.len()==0 || !matches!(mode,"AND"|"OR") {return Err("Invalid condition group".into())}
+ *count+=conditions.len(); if *count>100 {return Err("Maximum 100 conditions per rule".into())}
+ for c in conditions {if !names.contains(c.field.as_str()){return Err("Unknown rule field".into())} compare(c,input)?;}
+ for g in groups {validate_group(&g.conditions,&g.groups,&g.mode,depth+1,count,names,input)?;}
+ Ok(())
+}
+fn evaluate_group(conditions:&[Condition], groups:&[Group], mode:&str, input:&Value)->Result<bool,String>{
+ let mut matches=Vec::new();
+ for c in conditions {matches.push(compare(c,input)?);}
+ for g in groups {matches.push(evaluate_group(&g.conditions,&g.groups,&g.mode,input)?);}
+ Ok(if mode=="AND" {matches.iter().all(|m|*m)} else {matches.iter().any(|m|*m)})
+}
 fn and()->String {"AND".into()}
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -44,12 +60,10 @@ pub fn evaluate_json(bytes:&[u8])->Result<Value,String>{
  if object.keys().any(|k|!names.contains(k.as_str())){return Err("Unknown input field".into())}
  // Validate every rule before evaluating, including unreachable branches.
  for r in &req.rule.rules{
- if r.conditions.is_empty()||r.conditions.len()>20||!matches!(r.mode.as_str(),"AND"|"OR"){return Err("Invalid condition group".into())}
- for c in &r.conditions{if !names.contains(c.field.as_str()){return Err("Unknown rule field".into())}compare(c,&req.input)?;}
+ validate_group(&r.conditions,&r.groups,&r.mode,0,&mut 0,&names,&req.input)?;
  }
  for r in &req.rule.rules{
- let matches:Vec<bool>=r.conditions.iter().map(|c|compare(c,&req.input)).collect::<Result<_,_>>()?;
- if if r.mode=="AND"{matches.iter().all(|m|*m)}else{matches.iter().any(|m|*m)}{return Ok(r.output.clone())}
+ if evaluate_group(&r.conditions,&r.groups,&r.mode,&req.input)? {return Ok(r.output.clone())}
  }
  Ok(req.rule.default_output)
 }

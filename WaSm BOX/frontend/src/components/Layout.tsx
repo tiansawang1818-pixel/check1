@@ -1,4 +1,6 @@
-import { Link, Navigate, NavLink, Outlet, useNavigate } from "react-router-dom";
+import { CanvasArtwork } from "./CanvasArtwork";
+import { AtelierRoom } from "./AtelierRoom";
+import { Link, Navigate, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   Bot,
   Code2,
@@ -13,13 +15,23 @@ import {
   User,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAction, useAuth } from "../lib/context";
 import { supabase } from "../lib/api";
 import { ErrorBox, Loading } from "./ui";
 import { StudioTools } from "./StudioTools";
 export function Layout() {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const content = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!window.matchMedia || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const animation = content.current?.animate?.([
+      { opacity: 0, transform: "translateY(12px)" },
+      { opacity: 1, transform: "translateY(0)" },
+    ], { duration: 360, easing: "cubic-bezier(.22,1,.36,1)" });
+    return () => animation?.cancel();
+  }, [pathname]);
   const { session, profile, loading, error } = useAuth();
   const [open, setOpen] = useState(false);
   const { run, busy } = useAction();
@@ -28,7 +40,7 @@ export function Layout() {
   if (error || profile?.status === "SUSPENDED") {
     return (
       <main className="setup">
-        <ErrorBox error={error || "Your account is suspended."} />
+        <ErrorBox error={error || "บัญชีนี้ถูกระงับการใช้งาน กรุณาติดต่อผู้ดูแลระบบ"} />
         <button onClick={() => void supabase?.auth.signOut()}>
           ออกจากระบบ
         </button>
@@ -72,17 +84,17 @@ export function Layout() {
             {(profile?.username || "W").slice(0, 1).toUpperCase()}
           </div>
           <div>
-            <strong>{profile?.username || "My workspace"}</strong>
+            <strong>{profile?.username || "พื้นที่ทำงานของฉัน"}</strong>
             <small>พื้นที่ทำงานส่วนตัว</small>
           </div>
         </div>
         <div className="nav-label">พื้นที่ของคุณ</div>
         <nav>
-          {links.map(([to, title, Icon]) => (
+          {links.filter(([to]) => !to.startsWith("/developer")).map(([to, title, Icon]) => (
             <NavLink
               key={to}
               to={to}
-              end={to !== "/bots"}
+              end
               onClick={() => setOpen(false)}
             >
               <Icon size={19} />
@@ -90,11 +102,21 @@ export function Layout() {
             </NavLink>
           ))}
         </nav>
+        <details className="advanced-navigation">
+          <summary>สำหรับผู้พัฒนา</summary>
+          <nav aria-label="เครื่องมือสำหรับผู้พัฒนา">
+            {links.filter(([to]) => to.startsWith("/developer")).map(([to, title, Icon]) => (
+              <NavLink key={to} to={to} end onClick={() => setOpen(false)}>
+                <Icon size={19} />{title}
+              </NavLink>
+            ))}
+          </nav>
+        </details>
         <div className="sidebar-bottom">
           <div className="sandbox-note">
             <Shield size={18} />
             <span>
-              Powered by Rust WASM<small>Logic runs in isolation</small>
+              เริ่มจากตัวอย่างได้เลย<small>สร้าง · ทดลอง · แชร์บอท</small>
             </span>
           </div>
           <button
@@ -117,11 +139,12 @@ export function Layout() {
           </span>
           <StudioTools onNavigate={navigate}/>
         </header>
-        <main className="main" id="main-content">
-          <Outlet />
+        <main ref={content} className="main" id="main-content">
+            <AtelierRoom><Outlet /></AtelierRoom>
+          <CanvasArtwork />
         </main>
         <footer className="app-footer">
-          WasmBot Studio <span>Build once. Run anywhere.</span>
+          WasmBot Studio <span>สร้างครั้งเดียว ใช้งานได้ทุกที่</span>
         </footer>
       </div>
     </div>

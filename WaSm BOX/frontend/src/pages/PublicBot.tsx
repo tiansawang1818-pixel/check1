@@ -1,3 +1,4 @@
+import { CanvasArtwork } from "../components/CanvasArtwork";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { Flag, Layers3 } from "lucide-react";
@@ -6,6 +7,10 @@ import { BotForm, Output } from "../components/BotForm";
 import { Badge, ErrorBox, Loading } from "../components/ui";
 import { useAction } from "../lib/context";
 export function PublicBot() {
+  const location = useLocation();
+  return <PublicBotPage key={location.pathname} />;
+}
+function PublicBotPage() {
   const { slug } = useParams();
   const location = useLocation();
   const embed = location.pathname.startsWith("/embed/");
@@ -19,6 +24,7 @@ export function PublicBot() {
     [reason, setReason] = useState("Broken Bot"),
     [description, setDescription] = useState("");
   const { run, busy } = useAction();
+  const [retry, setRetry] = useState(0);
   useEffect(() => {
     if (!embed || parent === window) return;
     try {
@@ -39,22 +45,27 @@ export function PublicBot() {
     : undefined;
   useEffect(() => {
     let current = true;
+    const controller = new AbortController();
     if (embed && !parentOrigin) return;
     setError("");
+    setBot(null);
+    setResult(null);
     void api(
       path,
       "GET",
       undefined,
       embed && parentOrigin ? { "x-embed-origin": parentOrigin } : undefined,
+      { signal: controller.signal },
     ).then((d) => {
       if (current) setBot(d.bot);
     }).catch((e) => {
-      if (current) setError(e.message);
+      if (current) setError(e instanceof Error ? e.message : "โหลดบอทไม่สำเร็จ กรุณาลองใหม่");
     });
     return () => {
       current = false;
+      controller.abort();
     };
-  }, [path, embed, parentOrigin]);
+  }, [path, embed, parentOrigin, retry]);
   useEffect(() => {
     if (!embed || !parentOrigin || parent === window) return;
     const observer = new ResizeObserver(() =>
@@ -88,15 +99,15 @@ export function PublicBot() {
           <span className="muted">บอทสาธารณะ</span>
         </header>
       )}
+      {!embed && <CanvasArtwork />}
       <main className="public-card">
-        {error ? <ErrorBox error={error} /> : !bot
+        {error ? <ErrorBox error={error} retry={() => setRetry((value) => value + 1)} /> : !bot
           ? (
             <>
               <Loading />
               {embed && !parentOrigin && (
                 <p className="muted">
-                  Waiting for the embedding page. Use widget.js when the parent
-                  hides its referrer.
+                  กำลังรอการเชื่อมต่อจากเว็บไซต์ที่ฝังบอท
                 </p>
               )}
             </>
@@ -106,7 +117,7 @@ export function PublicBot() {
               {(bot.widget.showBotName || bot.widget.title) && (
                 <>
                   <div className="eyebrow">
-                    {embed ? "" : "BUSINESS LOGIC, ON DEMAND"}
+                    {embed ? "" : "ให้บอทช่วยจัดการงานของคุณ"}
                   </div>
                   <h1>{bot.widget.title || bot.name}</h1>
                 </>
@@ -124,12 +135,12 @@ export function PublicBot() {
               {result && (
                 <div className="public-result">
                   <div className="panel-heading">
-                    <h2>Result</h2>
+                    <h2>ผลลัพธ์</h2>
                     <Badge>SUCCESS</Badge>
                   </div>
                   <Output value={result.output} type={bot.output_schema.type} />
                   <small>
-                    {result.executionTimeMs} ms · Version {result.version}
+                    {result.executionTimeMs} ms · เวอร์ชัน {result.version}
                   </small>
                 </div>
               )}
@@ -148,7 +159,7 @@ export function PublicBot() {
                     className="text-link report-link"
                     onClick={() => setReport(!report)}
                   >
-                    <Flag size={14} />Report this bot
+                    <Flag size={14} />รายงานปัญหาบอท
                   </button>
                   {report && (
                     <form
@@ -161,25 +172,25 @@ export function PublicBot() {
                             description,
                           });
                           setReport(false);
-                        }, "Report submitted.");
+                        }, "ส่งรายงานเรียบร้อยแล้ว");
                       }}
                     >
                       <label>
-                        Reason<select
+                        เหตุผล<select
                           value={reason}
                           onChange={(e) => setReason(e.target.value)}
                         >
                           {[
-                            "Spam",
-                            "Abusive Content",
-                            "Suspicious Behavior",
-                            "Broken Bot",
-                            "Other",
-                          ].map((s) => <option key={s}>{s}</option>)}
+                            ["Spam", "สแปม"],
+                            ["Abusive Content", "เนื้อหาไม่เหมาะสม"],
+                            ["Suspicious Behavior", "พฤติกรรมน่าสงสัย"],
+                            ["Broken Bot", "บอททำงานผิดปกติ"],
+                            ["Other", "อื่น ๆ"],
+                          ].map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                         </select>
                       </label>
                       <label>
-                        Description<textarea
+                        รายละเอียด<textarea
                           maxLength={2000}
                           value={description}
                           onChange={(e) => setDescription(e.target.value)}

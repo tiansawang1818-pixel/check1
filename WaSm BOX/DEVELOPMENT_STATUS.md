@@ -76,3 +76,43 @@ Frontend was served locally at 127.0.0.1:5174; this is not evidence of public fr
 Submitted one password-reset request for the user-provided existing account through the browser. Supabase returned success and the generic confirmation appeared. Inbox delivery, opening the recovery link, user-completed password change and subsequent login remain unverified. New-account signup/email confirmation also remains outstanding because the provided address is already registered. No password was entered or changed by the agent.
 
 Run-form upload validation: TypeScript, ESLint, 55 Vitest tests and production build passed. Build retains the existing large-chunk warning. The run-form changes above are included in this upload; CI status will be reported after push.
+
+## Public-page and account reliability — 2026-10-11 (local)
+
+Public bot pages now reset component state when the route changes, cancel obsolete metadata reads, clear stale bot/output state during reload and offer an explicit retry on load failure. Delayed execution results from a previous bot cannot populate the next bot page. Public result/report labels and reason labels are Thai while report API enum values remain unchanged.
+
+Authentication forms reset their local state when switching between login, signup and recovery routes, preventing a typed password from carrying into another form. Email values are trimmed on submission; recovery instructions describe the actual flow and stale success messages are cleared before a new request.
+
+Preflight now rejects legacy service-role JWTs under any VITE variable name without displaying the token. This is a configuration guard, not a general secret scanner or JWT signature verifier.
+
+Validation: frontend TypeScript and ESLint passed; 58 Vitest tests and 8 preflight tests passed; production build passed with the existing bundle-size warning. Added regression coverage for delayed results across bot navigation, public read retry and password state isolation. Changes in this section remain local and are not deployed or pushed.
+
+## Bot management and production configuration — 2026-10-11 (local)
+
+Fixed the embed-domain editor stripping separators during typing. It now preserves raw text and parses comma/newline-separated hosts only on save, using the existing server/schema validation. Bot detail state is keyed by bot ID so transient publication/editor state does not cross between bots. Translated key management tabs, testing and publication actions/instructions into Thai.
+
+Added opt-in `--production` preflight checks for HTTPS domain origins and root-path hosting; local development remains supported without that flag. The checks do not perform DNS resolution or verify hosted services. Corrected the Docker-only deployment guidance to reflect the recorded successful hosted CLI upload.
+
+Validation: TypeScript, ESLint and 59 Vitest tests passed, including a regression that types and saves multiple embed domains. Preflight suite passed 10 tests. These changes remain local; no hosted settings, user credentials or external permissions were changed.
+
+## Beginner-friendly publishing — 2026-10-11 (local)
+
+Publishing now leads with three plain-language steps and a single public-link switch. API/embed settings and code samples are collapsed under explicit advanced sections. Share links are shown only when a version is published and public access is saved; local URLs explain that other devices cannot use the link. Settings use Thai field/theme labels, while webhook configuration is collapsed. No access permissions were changed by this UI work.
+
+Authenticated browser inspection confirmed the new guide, Thai tabs, collapsed advanced sections and local-link explanation. Screenshot: artifacts/screenshots/simple-publish.png. Frontend TypeScript/ESLint and 59 tests passed; the targeted domain test also covers the advanced section being closed and an unpublished bot having no open-link action. No claim of a usability study with novice participants; that remains useful before release.
+
+## 2026-10-14 — Atelier UI and nested rules (local)
+
+- Warm paper/graphite theme with generated cottage sketch, preserved circuit motion and route transitions; mobile nested editor checked at 390px without horizontal document overflow.
+- Recursive AND/OR groups in visual editor, schema, and Rust WASM; backward-compatible flat rules; bounded depth and condition count; recursive field-deletion protection.
+- Verification and required hosted-backend rollout: see `docs/nested-conditions.md`.
+- This round has not been pushed or deployed. Hosted functions still need the updated schema/WASM before nested rules can be used online.
+- Artwork provenance and full generation prompt: `docs/atelier-art.md`.
+
+### Theme correction
+
+Removed the cottage from the interface. The visual reference now informs the whole paper/graphite design instead of appearing as a picture. Original SVG pencil studies vary by page, with shared treatments for authentication, administration and public bots. Forms retain clear surfaces and decorative graphics are hidden from assistive technology. Frontend TypeScript, ESLint, 62 tests and production build passed.
+
+## 2026-10-16 — Remove repeated artwork (local)
+
+Removed the shared three-illustration footer and repeated raster backgrounds from cards and panels. The botanical paper illustration remains on the dashboard and auth artwork area; other workspace pages use one route-specific pencil study. Public bot cards use one header study. Compact spacing, paper textures and functional dashboard shortcuts remain. TypeScript, targeted ESLint and production build passed (existing bundle-size warning remains).

@@ -1,0 +1,60 @@
+/* One continuous illustrated paper surface across every application route. */
+:root { --paper-fiber:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath d='M0 0h160v160H0z' filter='url(%23n)' opacity='.075'/%3E%3C/svg%3E"); --paper-drawing:url('/images/studio-manuscript.svg'); }
+body { background:#e6ddcb; }
+:is(.app-layout,.auth-layout,.public-layout,.setup) { background-color:#eee5d3; background-image:var(--paper-fiber),var(--paper-drawing); background-size:160px,1400px 1100px; color:var(--ink); }
+:is(.user-shell,.admin-shell) .main { width:100%; max-width:1600px; padding:26px 34px 38px; background:transparent; position:relative; }
+.app-content { background:transparent; min-width:0; }
+:is(.user-shell,.admin-shell) .sidebar { background-color:#e8dfca; background-image:var(--paper-fiber),var(--paper-drawing); background-size:160px,850px; background-position:0 0,0 bottom; border-right:3px double #998b71; box-shadow:6px 0 18px #4f3e2010; }
+:is(.user-shell,.admin-shell) .topbar { background:#f2ead8d9; border-bottom:3px double #a39477; backdrop-filter:blur(8px); }
+.sidebar .brand { padding-bottom:17px; border-bottom:3px double #928167; font-family:Georgia,Thonburi,serif; }
+.sidebar .workspace { background:#fff9e8c9; border:1px solid #b9a98b; border-radius:2px 10px 3px 7px; box-shadow:3px 4px 0 #6d573015; }
+.sidebar nav a { border-radius:1px 9px 2px 5px; border:1px solid transparent; }
+.sidebar nav a.active { background:#fff9e9e8; border-color:#9d8a68; box-shadow:2px 3px 0 #75604428; }
+.sidebar nav a:hover { background:#f9f1df; }
+:is(.panel,.metric,.bot-card,.getting-started,.builder,.auth-card,.public-card,.settings-card,.rule-card,.field-card,.default-rule,.condition-group) { background-color:#fffaeeed; background-image:var(--paper-fiber); border:1px solid #b5a383; border-radius:2px 9px 3px 6px; box-shadow:3px 4px 0 #b7a78935,0 8px 18px #4b3c2010; }
+:is(.panel,.bot-card,.metric,.getting-started) { position:relative; }
+:is(.panel,.bot-card,.getting-started)::before { content:""; display:block; position:absolute; width:45px; height:12px; top:-6px; right:24px; background:#cab78c70; border-inline:1px dashed #9b895559; transform:rotate(3deg); pointer-events:none; }
+:is(.section-heading,.panel-heading,.page-heading) { border-bottom:3px double #ae9a76; padding-bottom:12px; }
+:is(h1,h2,h3,.sketchbook-title) { font-family:Georgia,"Thonburi",serif; }
+:is(input,textarea,select) { background:#fffdf5; color:#302d25; border:1px solid #a3957b; border-radius:4px; box-shadow:inset 0 2px 3px #50402106; }
+:is(input,textarea,select):focus-visible { outline:2px solid #705b3b; outline-offset:3px; }
+:is(button,.button,.primary,.secondary) { border-radius:3px 8px 2px 5px; }
+.primary { background:#39362e; color:#fff9e9; box-shadow:3px 3px 0 #a08a63; border:1px solid #39362e; }
+.secondary { background:#fff8e7; border:1px solid #9e8a66; box-shadow:2px 2px 0 #ad98632b; }
+:is(table th,.builder-steps,.tabs,.builder-starters) { background:#e6dac1bd; }
+:is(table td,table th) { border-bottom:1px solid #c3b596; }
+tbody tr:nth-child(even) { background:#eee4cd55; }
+:is(.empty-state,.empty,.loading) { background:var(--paper-fiber),linear-gradient(110deg,#fff9e9e8,#f0e4ccd9); border:1px dashed #a38b61; border-radius:4px; }
+:is(.user-shell,.admin-shell) .sketchbook-page { height:auto; min-height:138px; margin-bottom:24px; padding:18px 22px; border:0; border-bottom:3px double #897352; background:linear-gradient(100deg,#f9f1dded,#f4ead090,transparent); }
+.page-gallery-art { display:none; }
+.sketchbook-page::before { content:""; width:100px; align-self:stretch; order:2; background:var(--paper-drawing) 89% 7% / 700px; opacity:.8; }
+.sketchbook-title { font-size:25px; }
+.sketchbook-description { max-width:650px; }
+.gallery-wall { border-bottom:3px double #8f7c59; padding-bottom:22px; }
+.gallery-masthead { background:linear-gradient(90deg,#f9efd8e0,transparent); padding:16px 18px; }
+.gallery-frame { box-shadow:4px 5px 0 #77613b30,0 9px 18px #4b361e18; }
+.gallery-label { background:#fff9e7d6; padding:10px 12px; border:1px solid #b3a17f; transform:rotate(-.5deg); }
+.user-shell .studio-hero { padding:20px; background:#fff7e5de; border:1px solid #b7a17a; }
+.app-footer { background:#e6dac2b3; border-top:3px double #a79572; padding:18px 30px; font-family:Georgia,Thonburi,serif; }
+.auth-main { background:transparent; }
+.auth-art { background-color:#e6dcc6; background-image:var(--paper-fiber),var(--paper-drawing); background-size:160px,1100px; color:#39362e; border-right:3px double #a18e6c; }
+.auth-art :is(h1,p,.eyebrow,.brand,.auth-foot) { color:#39362e; }
+.auth-card { padding:28px; }
+.public-layout { min-height:100vh; }
+.public-card { border:1px solid #a38b63; }
+:where(a,button):focus-visible { outline:2px solid #705b3b; outline-offset:4px; }
+[data-studio-theme=dark] { --ink:#eee6d5; }
+[data-studio-theme=dark] :is(.main,.app-content) { background:#25241fe8; }
+[data-studio-theme=dark] :is(.panel,.metric,.bot-card,.builder,.rule-card,.field-card,.condition-group,.sidebar,.topbar,.workspace,.getting-started,.studio-hero,.sketchbook-page,.gallery-label) { background-color:#323027; color:#eee6d5; background-image:var(--paper-fiber); }
+@media(max-width:800px) { :is(.user-shell,.admin-shell) .main { padding:22px 18px; } }
+@media(max-width:640px) { :is(.user-shell,.admin-shell) .main { padding:18px 12px; } .sketchbook-page::before { width:55px; flex-shrink:0; } :is(.user-shell,.admin-shell) .sketchbook-page { padding:14px 12px; min-height:115px; } .auth-card { padding:22px 18px; } .gallery-masthead { padding:12px 8px; } .gallery-label { padding:8px; } }
+@media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; } }
+:is(.user-shell,.admin-shell) .main { box-sizing:border-box; min-width:0; }
+.app-content { overflow-x:clip; }
+.auth-card .sketchbook-page { min-height:0; height:auto; margin-bottom:20px; padding:0 0 14px; }
+.auth-card .sketchbook-page::before { display:none; }
+/* Different portions of the drawing unfold with each room of the studio. */
+.app-layout:has(.builder) { background-position:0 0,120px 180px; }
+.app-layout:has(.api-keys) { background-position:0 0,-300px 80px; }
+.admin-shell { background-position:0 0,-230px -300px; }
+.public-layout { background-position:0 0,center -180px; }

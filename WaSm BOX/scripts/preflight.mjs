@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { isIP } from 'node:net';
 
 export function parseEnv(text) {
   const values = {};
@@ -18,7 +19,23 @@ const webUrl = (value) => {
   try { const url = new URL(value); return ['https:', 'http:'].includes(url.protocol) && !url.username && !url.password && !url.search && !url.hash; }
   catch { return false; }
 };
-export function inspectConfig(frontend, edge) {
+function jwtRole(value) {
+  if (value.split('.').length !== 3) return null;
+  try { return JSON.parse(Buffer.from(value.split('.')[1], 'base64url').toString()).role; }
+  catch { return null; }
+}
+function productionOrigin(value) {
+  if (!webUrl(value)) return false;
+  const url = new URL(value);
+  const host = url.hostname.replace(/^\[|\]$/g, '').toLowerCase();
+  return url.protocol === 'https:' && url.pathname === '/' &&
+    !isIP(host) &&
+    host !== 'localhost' && !host.endsWith('.localhost') &&
+    !host.endsWith('.local') && host !== '::1' && host !== '0.0.0.0' &&
+    !/^127\./.test(host) && !/^10\./.test(host) && !/^192\.168\./.test(host) &&
+    !/^172\.(1[6-9]|2\d|3[01])\./.test(host);
+}
+export function inspectConfig(frontend, edge, { production = false } = {}) {
   const checks = [];
   const add = (name, pass, help) => checks.push({ name, pass: Boolean(pass), help });
   add('VITE_SUPABASE_URL', webUrl(frontend.VITE_SUPABASE_URL), 'ใส่ Project URL จาก Supabase');
@@ -29,8 +46,12 @@ export function inspectConfig(frontend, edge) {
   }
   add('VITE_SUPABASE_ANON_KEY', publicKey, 'ใช้ publishable key หรือ legacy anon key เท่านั้น');
   add('VITE_APP_URL', webUrl(frontend.VITE_APP_URL), 'ระบุ URL ของเว็บให้ตรงกับ Auth Site URL และ Redirect URLs');
+  if (production) {
+    add('Production frontend URL', productionOrigin(frontend.VITE_APP_URL), 'ใช้โดเมน HTTPS จริง โดยไม่มี path และไม่ใช่ localhost หรือ IP ภายใน');
+    add('Production Supabase URL', productionOrigin(frontend.VITE_SUPABASE_URL), 'ใช้ HTTPS URL ของ Supabase จริง');
+  }
   for (const [name, value] of Object.entries(frontend)) {
-    if (name.startsWith('VITE_') && (/SERVICE_ROLE|SECRET|PRIVATE|ENCRYPTION/.test(name) || value.startsWith('sb_secret_'))) {
+    if (name.startsWith('VITE_') && (/SERVICE_ROLE|SECRET|PRIVATE|ENCRYPTION/.test(name) || value.startsWith('sb_secret_') || jwtRole(value) === 'service_role')) {
       add(`ห้ามเปิดเผยตัวแปร ${name}`, false, 'นำค่าลับออกจาก frontend และเก็บใน Edge secrets');
     }
   }
@@ -43,14 +64,14 @@ export function inspectConfig(frontend, edge) {
   }
   return checks;
 }
-export async function preflight(root, frontendPath = '.env', edgePath = '.env.edge') {
+export async function preflight(root, frontendPath = '.env', edgePath = '.env.edge', options = {}) {
   const load = async (path) => {
     try { return parseEnv(await readFile(resolve(root, path), 'utf8')); }
     catch (error) { if (error.code === 'ENOENT') return null; throw error; }
   };
   const frontend = await load(frontendPath);
   const edge = await load(edgePath);
-  const checks = inspectConfig(frontend || {}, edge);
+  const checks = inspectConfig(frontend || {}, edge, options);
   let wasm = false;
   try {
     const bytes = await readFile(resolve(root, 'supabase/functions/wasm-runtime/pkg/wasmbot_engine.wasm'));
@@ -64,6 +85,7 @@ export async function preflight(root, frontendPath = '.env', edgePath = '.env.ed
   return checks.every(check => check.pass) && Boolean(edge);
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
-  try { process.exitCode = await preflight(process.cwd(), process.argv[2], process.argv[3]) ? 0 : 1; }
+  const args = process.argv.slice(2).filter(arg => arg !== '--production');
+  try { process.exitCode = await preflight(process.cwd(), args[0], args[1], { production: process.argv.includes('--production') }) ? 0 : 1; }
   catch { console.error('ตรวจไฟล์ไม่สำเร็จ กรุณาตรวจสิทธิ์อ่านไฟล์ตั้งค่า'); process.exitCode = 1; }
 }

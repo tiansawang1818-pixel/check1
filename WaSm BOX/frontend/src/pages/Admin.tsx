@@ -17,6 +17,32 @@ import {
 } from "../components/ui";
 import { ExecutionTable, UsageChart } from "./Dashboard";
 import { Playground } from "./BotDetail";
+
+const adminMetricLabels: Record<string, string> = {
+  users: "ผู้ใช้ทั้งหมด",
+  active_users: "ผู้ใช้ที่ใช้งานอยู่",
+  suspended_users: "บัญชีที่ถูกระงับ",
+  bots: "บอททั้งหมด",
+  active_bots: "บอทที่เปิดใช้งาน",
+  published_bots: "บอทที่เผยแพร่แล้ว",
+  executions: "การทำงานทั้งหมด",
+  reports: "รายงานปัญหา",
+  Active: "เปิดใช้งาน",
+  Blocked: "ถูกระงับ",
+  Disabled: "ปิดใช้งาน",
+  Published: "เผยแพร่แล้ว",
+  Suspended: "บัญชีถูกระงับ",
+};
+
+const settingLabels: Record<string, string> = {
+  public_rate_limit: "จำนวนเรียกหน้าสาธารณะต่อนาที",
+  api_rate_limit: "จำนวนเรียก API ต่อนาที",
+  max_payload_bytes: "ขนาดข้อมูลเข้าสูงสุด (ไบต์)",
+  max_output_bytes: "ขนาดผลลัพธ์สูงสุด (ไบต์)",
+  max_memory_bytes: "หน่วยความจำสูงสุด (ไบต์)",
+  maintenance_mode: "โหมดปิดปรับปรุงระบบ",
+  allow_registration: "อนุญาตให้สมัครสมาชิก",
+};
 export function Admin() {
   const { profile } = useAuth();
   const { section = "dashboard", id } = useParams();
@@ -34,53 +60,51 @@ export function Admin() {
     void run(async () => {
       await api("admin", "POST", payload);
       reload();
-    }, "Action recorded in audit log.");
+    }, "ดำเนินการแล้ว และบันทึกไว้ในประวัติผู้ดูแลระบบ");
   const botStatus = (botId: string, status: string) => {
     const reason = status === "ACTIVE"
       ? ""
-      : prompt(`Reason for ${status.toLowerCase()} (required)`);
+      : prompt("ระบุเหตุผลที่เปลี่ยนสถานะบอท (จำเป็น)");
     if (reason === null) return;
     if (
       confirm(
-        `${
-          status === "ACTIVE"
-            ? "Enable"
-            : status === "BLOCKED"
-            ? "Block"
-            : "Disable"
-        } this bot?`,
+        status === "ACTIVE"
+          ? "เปิดใช้งานบอทนี้หรือไม่?"
+          : status === "BLOCKED"
+          ? "ระงับบอทนี้หรือไม่?"
+          : "ปิดใช้งานบอทนี้หรือไม่?",
       )
     ) action({ action: "bot-status", id: botId, status, reason });
   };
   const botActions = (b: any) => (
     <div className="actions">
-      <Link className="text-link" to={`/admin/bots/${b.id}`}>View</Link>
+      <Link className="text-link" to={`/admin/bots/${b.id}`}>ดูรายละเอียด</Link>
       <button
         className="text-link"
         disabled={busy}
         onClick={() => botStatus(b.id, "ACTIVE")}
       >
-        Enable
+        เปิดใช้งาน
       </button>
       <button
         className="text-link"
         disabled={busy}
         onClick={() => botStatus(b.id, "DISABLED")}
       >
-        Disable
+        ปิดใช้งาน
       </button>
       <button
         className="danger-text"
         disabled={busy}
         onClick={() => botStatus(b.id, "BLOCKED")}
       >
-        Block
+        ระงับ
       </button>
       <button
         className="text-link"
         disabled={busy}
         onClick={() => {
-          if (confirm("Force unpublish this bot?")) {
+          if (confirm("ยกเลิกการเผยแพร่บอทนี้ทันทีหรือไม่?")) {
             action({
               action: "bot-unpublish",
               id: b.id,
@@ -88,13 +112,13 @@ export function Admin() {
           }
         }}
       >
-        Unpublish
+        ยกเลิกเผยแพร่
       </button>
       <button
         className="danger-text"
         disabled={busy}
         onClick={() => {
-          if (confirm("Soft-delete this bot and stop all channels?")) {
+          if (confirm("ลบบอทนี้และหยุดทุกช่องทางใช้งานหรือไม่?")) {
             action({
               action: "bot-delete",
               id: b.id,
@@ -102,7 +126,7 @@ export function Admin() {
           }
         }}
       >
-        Delete
+        ลบ
       </button>
     </div>
   );
@@ -119,7 +143,16 @@ export function Admin() {
           logs: "บันทึกผู้ดูแล",
           settings: "ตั้งค่าระบบ",
         }[section] || section)}
-        description="จัดการการใช้งานทั้งระบบ พร้อมประวัติการเปลี่ยนแปลงที่ตรวจสอบได้"
+        description={{
+          dashboard: "สรุปจำนวนผู้ใช้ บอท และการใช้งานในระบบ",
+          users: "ดูบัญชีผู้ใช้และจัดการสถานะการใช้งาน",
+          bots: "ตรวจสอบบอทและสถานะการเผยแพร่",
+          executions: "ตรวจข้อมูลและผลลัพธ์ของการทำงานแต่ละครั้ง",
+          reports: "ตรวจสอบปัญหาที่ผู้ใช้แจ้งเข้ามา",
+          monitoring: "ติดตามข้อผิดพลาดและสถานะการทำงาน",
+          logs: "ตรวจสอบประวัติการดำเนินการของผู้ดูแลระบบ",
+          settings: "กำหนดค่าการทำงานของระบบ",
+        }[section]}
       />
       {loading
         ? <Loading />
@@ -132,33 +165,37 @@ export function Admin() {
           <>
             <div className="metrics">
               {Object.entries(data.stats).map(([k, v]) => (
-                <Metric key={k} label={k} value={String(v)} />
+                <Metric
+                  key={k}
+                  label={adminMetricLabels[k] || k.replaceAll("_", " ")}
+                  value={String(v)}
+                />
               ))}
               <Metric
-                label="Total executions"
+                label="การทำงานทั้งหมด"
                 value={data.analytics.totals.total}
               />
               <Metric
-                label="Executions today"
+                label="การทำงานวันนี้"
                 value={data.analytics.totals.today}
               />
               <Metric
-                label="Failed executions"
+                label="ทำงานไม่สำเร็จ"
                 value={data.analytics.totals.failed}
               />
               <Metric
-                label="API executions today"
+                label="เรียกผ่าน API วันนี้"
                 value={data.analytics.totals.api_today}
               />
             </div>
-            <Panel title="Execution activity">
+            <Panel title="กิจกรรมการใช้งาน">
               <UsageChart daily={data.analytics.daily} />
             </Panel>
             <div className="two-col">
-              <Panel title="New users · 7 days">
+              <Panel title="ผู้ใช้ใหม่ · 7 วัน">
                 <CreationChart rows={data.newUsers} />
               </Panel>
-              <Panel title="Bots created · 7 days">
+              <Panel title="บอทที่สร้าง · 7 วัน">
                 <CreationChart rows={data.newBots} />
               </Panel>
             </div>
@@ -180,9 +217,9 @@ export function Admin() {
         : section === "monitoring"
         ? (
           <>
-            <Panel title="High failure rate">
+            <Panel title="บอทที่มีอัตราผิดพลาดสูง">
               <p className="muted">
-                More than 20 runs with a failure rate above 50%.
+                แสดงบอทที่ทำงานมากกว่า 20 ครั้ง และผิดพลาดเกิน 50%
               </p>
               {data.bots.filter((b: any) => b.failure_count / b.run_count > .5)
                   .length
@@ -197,12 +234,12 @@ export function Admin() {
                     {botActions(b)}
                   </div>
                 ))
-                : <Empty title="No high-failure bots found" />}
+                : <Empty title="ไม่พบบอทที่มีอัตราผิดพลาดสูง" />}
             </Panel>
-            <Panel title="Errors in the last hour">
+            <Panel title="ข้อผิดพลาดในชั่วโมงที่ผ่านมา">
               <p className="muted">
-                Recent timeout, memory, and rate-limit events (up to 1,000
-                records).
+                รายการหมดเวลา ใช้หน่วยความจำเกิน และเรียกใช้งานถี่เกินไป
+                สูงสุด 1,000 รายการ
               </p>
               <Json value={data.errors} />
             </Panel>
@@ -215,18 +252,18 @@ export function Admin() {
               <Badge>{data.bot.status}</Badge>
               <p>{data.bot.description}</p>
               <p>
-                Owner:{" "}
+                เจ้าของ:{" "}
                 <Link to={`/admin/users/${data.bot.user_id}`}>
                   {data.bot.user_id}
                 </Link>
               </p>
               {botActions(data.bot)}
               <div className="metrics">
-                <Metric label="Runs" value={data.bot.run_count} />
-                <Metric label="Successful" value={data.bot.success_count} />
-                <Metric label="Failures" value={data.bot.failure_count} />
+                <Metric label="จำนวนครั้งที่ทำงาน" value={data.bot.run_count} />
+                <Metric label="สำเร็จ" value={data.bot.success_count} />
+                <Metric label="ผิดพลาด" value={data.bot.failure_count} />
                 <Metric
-                  label="Average duration"
+                  label="เวลาประมวลผลเฉลี่ย"
                   value={`${
                     Number(data.analytics.totals.average_ms).toFixed(1)
                   } ms`}
@@ -235,17 +272,17 @@ export function Admin() {
             </Panel>
             <Playground bot={data.bot} admin />
             <div className="two-col">
-              <Panel title="Rules">
+              <Panel title="เงื่อนไข">
                 <Json value={data.bot.rule_definition} />
               </Panel>
-              <Panel title="Input schema">
+              <Panel title="รูปแบบข้อมูลรับเข้า">
                 <Json value={data.bot.input_schema} />
               </Panel>
             </div>
-            <Panel title="Deployments">
+            <Panel title="ประวัติการเผยแพร่">
               <Json value={data.deployments} />
             </Panel>
-            <Panel title="Executions">
+            <Panel title="ประวัติการทำงาน">
               <ExecutionTable rows={data.executions} admin />
             </Panel>
           </>
@@ -253,13 +290,13 @@ export function Admin() {
         : section === "executions" && id
         ? (
           <>
-            <Panel title="Execution detail">
+            <Panel title="รายละเอียดการทำงาน">
               <Badge>{data.execution.status}</Badge>
               <Json
                 value={{
                   requestId: data.execution.request_id,
                   bot: data.execution.bots?.name,
-                  version: data.execution.bot_deployments?.version ?? "Draft",
+                  version: data.execution.bot_deployments?.version ?? "ฉบับร่าง",
                   source: data.execution.source,
                   time: data.execution.created_at,
                   durationMs: data.execution.execution_time_ms,
@@ -269,10 +306,10 @@ export function Admin() {
               />
             </Panel>
             <div className="two-col">
-              <Panel title="Input">
+              <Panel title="ข้อมูลรับเข้า">
                 <Json value={data.execution.input} />
               </Panel>
-              <Panel title="Output">
+              <Panel title="ผลลัพธ์">
                 <Json value={data.execution.output} />
               </Panel>
             </div>
@@ -284,12 +321,12 @@ export function Admin() {
             <Panel title={data.profile.username || data.profile.email}>
               <Json value={data.profile} />
             </Panel>
-            <Panel title="User bots">
+            <Panel title="บอทของผู้ใช้นี้">
               {data.bots.map((b: any) => (
                 <div className="list-row" key={b.id}>
                   <Link to={`/admin/bots/${b.id}`}>{b.name}</Link>
                   <Badge>{b.status}</Badge>
-                  <span>{b.run_count} runs</span>
+                  <span>ทำงาน {b.run_count} ครั้ง</span>
                 </div>
               ))}
             </Panel>
@@ -298,7 +335,7 @@ export function Admin() {
         : (
           <Panel>
             {!data.rows?.length
-              ? <Empty title={`No ${section} records`} />
+              ? <Empty title="ยังไม่มีข้อมูลในส่วนนี้" />
               : section === "executions"
               ? <ExecutionTable rows={data.rows} admin />
               : section === "users"
@@ -307,12 +344,12 @@ export function Admin() {
                   <table>
                     <thead>
                       <tr>
-                        <th>User</th>
-                        <th>Role</th>
-                        <th>Status</th>
-                        <th>Bots / Runs</th>
-                        <th>Created / Last active</th>
-                        <th>Actions</th>
+                        <th>ผู้ใช้</th>
+                        <th>สิทธิ์</th>
+                        <th>สถานะ</th>
+                        <th>บอท / การทำงาน</th>
+                        <th>สร้างเมื่อ / ใช้ล่าสุด</th>
+                        <th>จัดการ</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -320,11 +357,11 @@ export function Admin() {
                         <tr key={u.id}>
                           <td>
                             <Link to={`/admin/users/${u.id}`}>
-                              <strong>{u.username || "Unnamed user"}</strong>
+                              <strong>{u.username || "ผู้ใช้ยังไม่ได้ตั้งชื่อ"}</strong>
                               <small>{u.email}</small>
                             </Link>
                           </td>
-                          <td>{u.role}</td>
+                          <td><Badge>{u.role}</Badge></td>
                           <td>
                             <Badge>{u.status}</Badge>
                           </td>
@@ -334,7 +371,7 @@ export function Admin() {
                             <small>
                               {u.last_active_at
                                 ? formatDate(u.last_active_at)
-                                : "No activity recorded"}
+                                : "ยังไม่มีประวัติการใช้งาน"}
                             </small>
                           </td>
                           <td>
@@ -344,11 +381,11 @@ export function Admin() {
                                 disabled={busy || u.id === profile.id}
                                 onClick={() => {
                                   if (
-                                    confirm(`${
+                                    confirm(
                                       u.status === "ACTIVE"
-                                        ? "Suspend"
-                                        : "Unsuspend"
-                                    } this user?`)
+                                        ? "ระงับบัญชีผู้ใช้นี้หรือไม่?"
+                                        : "ยกเลิกการระงับบัญชีนี้หรือไม่?",
+                                    )
                                   ) {
                                     action({
                                       action: "user-status",
@@ -361,8 +398,8 @@ export function Admin() {
                                 }}
                               >
                                 {u.status === "ACTIVE"
-                                  ? "Suspend"
-                                  : "Unsuspend"}
+                                  ? "ระงับบัญชี"
+                                  : "ยกเลิกระงับ"}
                               </button>
                               <button
                                 className="text-link"
@@ -370,9 +407,9 @@ export function Admin() {
                                 onClick={() => {
                                   if (
                                     confirm(
-                                      `Change role to ${
-                                        u.role === "ADMIN" ? "USER" : "ADMIN"
-                                      }?`,
+                                      `เปลี่ยนสิทธิ์เป็น ${
+                                        u.role === "ADMIN" ? "ผู้ใช้งาน" : "ผู้ดูแลระบบ"
+                                      } หรือไม่?`,
                                     )
                                   ) {
                                     action({
@@ -385,7 +422,7 @@ export function Admin() {
                                   }
                                 }}
                               >
-                                Change role
+                                เปลี่ยนสิทธิ์
                               </button>
                               <button
                                 className="danger-text"
@@ -393,12 +430,12 @@ export function Admin() {
                                 onClick={() => {
                                   if (
                                     confirm(
-                                      "Deactivate this account, revoke keys, and soft-delete their bots? Auth identity and audit history are retained.",
+                                      "ปิดบัญชีนี้ เพิกถอนกุญแจ API และลบบอททั้งหมดหรือไม่? ประวัติการตรวจสอบจะยังถูกเก็บไว้",
                                     )
                                   ) action({ action: "user-delete", id: u.id });
                                 }}
                               >
-                                Delete
+                                ลบ
                               </button>
                             </div>
                           </td>
@@ -414,12 +451,12 @@ export function Admin() {
                   <table>
                     <thead>
                       <tr>
-                        <th>Bot</th>
-                        <th>Owner</th>
-                        <th>Status</th>
-                        <th>Channels</th>
-                        <th>Runs / Failures</th>
-                        <th>Actions</th>
+                        <th>บอท</th>
+                        <th>เจ้าของ</th>
+                        <th>สถานะ</th>
+                        <th>ช่องทางใช้งาน</th>
+                        <th>การทำงาน / ผิดพลาด</th>
+                        <th>จัดการ</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -429,7 +466,7 @@ export function Admin() {
                             <strong>{b.name}</strong>
                             <small>
                               {b.deleted_at
-                                ? "Deleted"
+                                ? "ลบแล้ว"
                                 : formatDate(b.created_at)}
                             </small>
                           </td>
@@ -442,11 +479,11 @@ export function Admin() {
                             <Badge>{b.status}</Badge>
                           </td>
                           <td>
-                            {b.is_published ? "Published" : "Draft"}
+                            {b.is_published ? "เผยแพร่แล้ว" : "ฉบับร่าง"}
                             <small>
-                              API {b.allow_api_access ? "on" : "off"} · Embed
+                              API {b.allow_api_access ? "เปิด" : "ปิด"} · ฝังเว็บ
                               {" "}
-                              {b.allow_embed ? "on" : "off"}
+                              {b.allow_embed ? "เปิด" : "ปิด"}
                             </small>
                           </td>
                           <td>{b.run_count} / {b.failure_count}</td>
@@ -465,7 +502,7 @@ export function Admin() {
                     <Badge>{r.status}</Badge>
                   </div>
                   <p>{r.description}</p>
-                  <Link to={`/admin/bots/${r.bot_id}`}>View reported bot</Link>
+                  <Link to={`/admin/bots/${r.bot_id}`}>ดูบอทที่ถูกรายงาน</Link>
                   <div className="actions">
                     {["REVIEWED", "DISMISSED", "ACTION_TAKEN"].map((status) => (
                       <button
@@ -475,7 +512,7 @@ export function Admin() {
                         onClick={() =>
                           action({ action: "report", id: r.id, status })}
                       >
-                        {status.replaceAll("_", " ")}
+                        <Badge>{status}</Badge>
                       </button>
                     ))}
                   </div>
@@ -487,11 +524,11 @@ export function Admin() {
                   <table>
                     <thead>
                       <tr>
-                        <th>Time</th>
-                        <th>Admin</th>
-                        <th>Action</th>
-                        <th>Target</th>
-                        <th>Details</th>
+                        <th>เวลา</th>
+                        <th>ผู้ดูแล</th>
+                        <th>การดำเนินการ</th>
+                        <th>รายการ</th>
+                        <th>รายละเอียด</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -532,13 +569,13 @@ function AdminSettings(
   const [settings, setSettings] = useState(initial);
   const { busy, run } = useAction();
   return (
-    <Panel title="System settings">
+    <Panel title="ตั้งค่าระบบ">
       <form
         onSubmit={(e) => {
           e.preventDefault();
           void run(
             async () => onSave(SettingsSchema.parse(settings)),
-            "System settings saved.",
+            "บันทึกการตั้งค่าระบบแล้ว",
           );
         }}
       >
@@ -547,7 +584,7 @@ function AdminSettings(
             className={typeof value === "boolean" ? "toggle-row" : ""}
             key={key}
           >
-            {key.replaceAll("_", " ")}
+            {settingLabels[key] || key.replaceAll("_", " ")}
             {typeof value === "boolean"
               ? (
                 <input
@@ -568,7 +605,7 @@ function AdminSettings(
               )}
           </label>
         ))}
-        <button className="primary" disabled={busy}>Save settings</button>
+        <button className="primary" disabled={busy}>บันทึกการตั้งค่า</button>
       </form>
     </Panel>
   );

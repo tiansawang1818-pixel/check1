@@ -1,0 +1,26 @@
+import React from "react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { afterEach, expect, it, vi } from "vitest";
+const mocks = vi.hoisted(() => ({ api: vi.fn(), resource: vi.fn() }));
+vi.mock("../frontend/src/lib/api", () => ({ api: mocks.api, apiUrl: "https://example.com", appUrl: "http://localhost", supabase: null }));
+vi.mock("../frontend/src/lib/context", () => ({ useResource: mocks.resource, useAction: () => ({ busy: false, run: (fn: () => Promise<void>) => fn() }), useToast: () => vi.fn() }));
+import { BotDetail } from "../frontend/src/pages/BotDetail";
+import { gradeTemplate } from "../supabase/functions/_shared/schema";
+afterEach(() => { cleanup(); vi.resetAllMocks(); });
+it("keeps separators while typing and submits multiple embed hosts", async () => {
+  mocks.api.mockResolvedValue({});
+  mocks.resource.mockReturnValue({ data: { bot: { ...gradeTemplate, id: "one", status: "DRAFT", public_slug: "one" }, deployments: [] }, loading: false, reload: vi.fn() });
+  render(<MemoryRouter initialEntries={["/bots/one/deploy"]}><Routes><Route path="/bots/:id/:tab" element={<BotDetail />} /></Routes></MemoryRouter>);
+  expect(screen.getByRole("checkbox", { name: "ให้ผู้อื่นใช้ผ่านลิงก์" })).toBeTruthy();
+  expect(screen.getByRole("checkbox", { name: "เชื่อมต่อแอปผ่าน API" }).closest("details")?.open).toBe(false);
+  expect(screen.queryByRole("link", { name: "เปิดหน้าบอท" })).toBeNull();
+  fireEvent.click(screen.getByText("ตัวเลือกขั้นสูง: เชื่อมแอปหรือฝังในเว็บไซต์"));
+  const field = screen.getByLabelText(/โดเมนที่อนุญาต/);
+  fireEvent.change(field, { target: { value: "example.com," } });
+  expect((field as HTMLTextAreaElement).value).toBe("example.com,");
+  fireEvent.change(field, { target: { value: "example.com, shop.example.com\nlocalhost:3000" } });
+  fireEvent.click(screen.getByRole("button", { name: "บันทึกช่องทางใช้งาน" }));
+  await waitFor(() => expect(mocks.api).toHaveBeenCalledTimes(1));
+  expect(mocks.api.mock.calls[0][2].allowed_domains).toEqual(["example.com", "shop.example.com", "localhost:3000"]);
+});

@@ -31,35 +31,36 @@ export function History() {
   return (
     <>
       <Heading
-        eyebrow="OBSERVABILITY"
-        title="Execution history"
-        description="Inspect inputs, outputs, and performance for every run."
+        eyebrow="ตรวจสอบการทำงาน"
+        title="ประวัติการรัน"
+        description="ดูข้อมูลที่รับเข้า ผลลัพธ์ และประสิทธิภาพของการรันแต่ละครั้ง"
       />
       <Panel>
+        {bots.error && <ErrorBox error="โหลดรายชื่อบอทสำหรับตัวกรองไม่สำเร็จ" retry={bots.reload} />}
         <div className="filters">
           <label>
-            Bot<select
+            บอท<select
               value={bot}
               onChange={(e) => {
                 setBot(e.target.value);
                 setPage(0);
               }}
             >
-              <option value="">All bots</option>
+              <option value="">ทุกบอท</option>
               {bots.data?.bots.map((b: any) => (
                 <option value={b.id} key={b.id}>{b.name}</option>
               ))}
             </select>
           </label>
           <label>
-            Status<select
+            สถานะ<select
               value={status}
               onChange={(e) => {
                 setStatus(e.target.value);
                 setPage(0);
               }}
             >
-              <option value="">All statuses</option>
+              <option value="">ทุกสถานะ</option>
               {[
                 "SUCCESS",
                 "RUNTIME_ERROR",
@@ -68,25 +69,25 @@ export function History() {
                 "MEMORY_LIMIT",
                 "BLOCKED",
                 "RATE_LIMITED",
-              ].map((s) => <option key={s}>{s}</option>)}
+              ].map((s) => <option key={s} value={s}>{{ SUCCESS: "สำเร็จ", RUNTIME_ERROR: "ประมวลผลผิดพลาด", VALIDATION_ERROR: "ข้อมูลไม่ถูกต้อง", TIMEOUT: "เกินเวลาที่กำหนด", MEMORY_LIMIT: "หน่วยความจำเกินกำหนด", BLOCKED: "ถูกระงับ", RATE_LIMITED: "เรียกใช้งานถี่เกินไป" }[s]}</option>)}
             </select>
           </label>
           <label>
-            Source<select
+            ช่องทาง<select
               value={source}
               onChange={(e) => {
                 setSource(e.target.value);
                 setPage(0);
               }}
             >
-              <option value="">All sources</option>
+              <option value="">ทุกช่องทาง</option>
               {["DASHBOARD", "PUBLIC_PAGE", "API", "EMBED"].map((s) => (
-                <option key={s}>{s}</option>
+                <option key={s} value={s}>{{ DASHBOARD: "หน้าทดสอบ", PUBLIC_PAGE: "หน้าสาธารณะ", API: "API", EMBED: "เว็บไซต์ที่ฝังบอท" }[s]}</option>
               ))}
             </select>
           </label>
           <label>
-            Date (UTC)<input
+            วันที่ (UTC)<input
               type="date"
               value={date}
               onChange={(e) => {
@@ -116,45 +117,50 @@ export function History() {
 }
 export function ExecutionDetail() {
   const { id } = useParams();
-  const { data, loading, error } = useResource(
+  const { data, loading, error, reload } = useResource(
     `studio?resource=executions&id=${id}`,
   );
   if (loading) return <Loading />;
-  if (error) return <ErrorBox error={error} />;
+  if (error) return <ErrorBox error={error} retry={reload} />;
   const e = data.executions[0];
-  if (!e) return <ErrorBox error="Execution not found." />;
+  if (!e) return <ErrorBox error="ไม่พบประวัติการรันนี้" />;
   return (
     <>
-      <Heading title="Execution detail" description={e.request_id}>
+      <Heading title="รายละเอียดการรัน" description={e.request_id}>
         <Badge>{e.status}</Badge>
         <Link className="secondary" to={`/bots/${e.bot_id}/executions`}>
-          Open bot
+          เปิดบอท
         </Link>
       </Heading>
       <Panel>
         <dl>
-          <dt>Bot</dt>
-          <dd>{e.bots.name}</dd>
-          <dt>Source</dt>
-          <dd>{e.source}</dd>
-          <dt>Time</dt>
+          <dt>บอท</dt>
+          <dd>{e.bots?.name || "บอทที่ไม่พร้อมใช้งาน"}</dd>
+          <dt>ช่องทาง</dt>
+          <dd>{{
+            DASHBOARD: "หน้าทดสอบ",
+            PUBLIC_PAGE: "หน้าสาธารณะ",
+            API: "API",
+            EMBED: "เว็บไซต์ที่ฝังบอท",
+          }[e.source as string] || e.source}</dd>
+          <dt>เวลา</dt>
           <dd>{formatDate(e.created_at)}</dd>
-          <dt>Execution</dt>
+          <dt>การประมวลผล</dt>
           <dd>{e.execution_time_ms} ms</dd>
-          <dt>Memory</dt>
+          <dt>หน่วยความจำ</dt>
           <dd>{e.memory_used ?? "—"} bytes</dd>
-          <dt>Production version</dt>
+          <dt>เวอร์ชันใช้งานจริง</dt>
           <dd>
-            {e.bot_deployments ? `v${e.bot_deployments.version}` : "Draft"}
+            {e.bot_deployments ? `v${e.bot_deployments.version}` : "ฉบับร่าง"}
           </dd>
         </dl>
         {e.error_message && <ErrorBox error={e.error_message} />}
       </Panel>
       <div className="two-col">
-        <Panel title="Input">
+        <Panel title="ข้อมูลรับเข้า">
           <Json value={e.input} />
         </Panel>
-        <Panel title="Output">
+        <Panel title="ผลลัพธ์">
           <Json value={e.output} />
         </Panel>
       </div>

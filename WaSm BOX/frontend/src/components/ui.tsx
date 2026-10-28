@@ -35,6 +35,17 @@ export function Badge({ children }: { children: ReactNode }) {
         RATE_LIMITED: "ใช้งานเกินกำหนด",
         TIMEOUT: "หมดเวลา",
         PENDING: "รอตรวจสอบ",
+        ADMIN: "ผู้ดูแลระบบ",
+        USER: "ผู้ใช้งาน",
+        SUSPENDED: "ระงับบัญชี",
+        LIVE: "กำลังใช้งาน",
+        ARCHIVED: "เก็บถาวร",
+        REVOKED: "เพิกถอนแล้ว",
+        REVIEWED: "ตรวจสอบแล้ว",
+        DISMISSED: "ยกเลิกรายงาน",
+        ACTION_TAKEN: "ดำเนินการแล้ว",
+        NOT_PUBLISHED: "ยังไม่เผยแพร่",
+        MEMORY_LIMIT: "ใช้หน่วยความจำเกินกำหนด",
       } as Record<string, string>)[String(children)] ||
         String(children).replaceAll("_", " ")}
     </span>
@@ -87,12 +98,12 @@ export function CopyButton(
           setCopied(true);
           setTimeout(() => setCopied(false), 2000);
         } catch {
-          toast("Clipboard unavailable. Select and copy the text.", true);
+          toast("คัดลอกอัตโนมัติไม่ได้ กรุณาเลือกข้อความแล้วคัดลอก", true);
         }
       }}
     >
       {copied ? <Check size={15} /> : <Copy size={15} />}{" "}
-      {copied ? "Copied" : label}
+      {copied ? "คัดลอกแล้ว" : label}
     </button>
   );
 }
@@ -161,17 +172,21 @@ export function Pagination(
         disabled={!page}
         onClick={() => setPage(page - 1)}
       >
-        Previous
+        ก่อนหน้า
       </button>
-      <span>Page {page + 1}</span>
+      <span>หน้า {page + 1}</span>
       <button
         className="secondary"
         disabled={count < 50}
         onClick={() => setPage(page + 1)}
       >
-        Next
+        ถัดไป
       </button>
     </div>
   );
 }
-export const formatDate = (value: string) => new Date(value).toLocaleString();
+export const formatDate = (value: string) =>
+  new Date(value).toLocaleString("th-TH", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });

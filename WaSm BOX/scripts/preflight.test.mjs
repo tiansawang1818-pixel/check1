@@ -26,3 +26,24 @@ test('rejects short secrets, malformed encryption keys and mismatched URLs', () 
 test('rejects credential-bearing URLs', () => {
   assert.equal(inspectConfig({ ...frontend, VITE_SUPABASE_URL: 'https://user:pass@example.com' }, edge)[0].pass, false);
 });
+test('rejects service-role JWT under any VITE variable without disclosing it', () => {
+  const token = 'header.' + Buffer.from(JSON.stringify({ role: 'service_role' })).toString('base64url') + '.signature';
+  const checks = inspectConfig({ ...frontend, VITE_CUSTOM_TOKEN: token }, edge);
+  assert.ok(checks.some(c => !c.pass && c.name.includes('VITE_CUSTOM_TOKEN')));
+  assert.ok(!JSON.stringify(checks).includes(token));
+});
+test('does not mistake a legacy anon JWT for a privileged secret', () => {
+  const token = 'header.' + Buffer.from(JSON.stringify({ role: 'anon' })).toString('base64url') + '.signature';
+  assert.ok(inspectConfig({ ...frontend, VITE_SUPABASE_ANON_KEY: token }, edge).every(c => c.pass));
+});
+test('production mode rejects development origins and subpath deployments', () => {
+  for (const value of ['http://example.com', 'https://localhost', 'https://127.0.0.1', 'https://[::1]', 'https://192.168.1.2', 'https://example.com/app']) {
+    const checks = inspectConfig({ ...frontend, VITE_APP_URL: value }, null, { production: true });
+    assert.equal(checks.find(c => c.name === 'Production frontend URL').pass, false, value);
+  }
+});
+test('production mode accepts a hosted HTTPS origin while development permits localhost', () => {
+  assert.ok(inspectConfig(frontend, edge).every(c => c.pass));
+  const url = 'https://wasmbox.example.com';
+  assert.ok(inspectConfig({ ...frontend, VITE_APP_URL: url }, { ...edge, APP_URL: url }, { production: true }).every(c => c.pass));
+});

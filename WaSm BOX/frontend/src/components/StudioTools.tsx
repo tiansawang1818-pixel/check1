@@ -10,7 +10,7 @@ const destinations = [
   { path: "/profile", name: "โปรไฟล์", hint: "จัดการข้อมูลบัญชีของคุณ" },
 ];
 function preference(key: string) {
-  try { return (localStorage.getItem(`wasmbot-ui-${key}`) ?? (key === "dark" ? "true" : "false")) === "true"; } catch { return false; }
+  try { return (localStorage.getItem(`wasmbot-mono-${key}`) ?? "false") === "true"; } catch { return false; }
 }
 export function StudioTools({ onNavigate, preview = false }: { onNavigate: (path: string) => void; preview?: boolean }) {
   const [dark, setDark] = useState(() => preference("dark"));
@@ -25,11 +25,15 @@ export function StudioTools({ onNavigate, preview = false }: { onNavigate: (path
   useEffect(() => {
     const shell = host.current?.closest<HTMLElement>(".user-shell");
     if (shell) { shell.dataset.studioTheme = dark ? "dark" : "light"; shell.dataset.density = compact ? "compact" : "comfortable"; }
-    try { localStorage.setItem("wasmbot-ui-dark", String(dark)); localStorage.setItem("wasmbot-ui-compact", String(compact)); } catch { /* Preferences are optional. */ }
+    try { localStorage.setItem("wasmbot-mono-dark", String(dark)); localStorage.setItem("wasmbot-mono-compact", String(compact)); } catch { /* Preferences are optional. */ }
   }, [dark, compact]);
   const open = (next: "search" | "help") => {
     trigger.current = document.activeElement as HTMLElement;
-    setMode(next); setQuery(""); dialog.current?.showModal();
+    setMode(next); setQuery("");
+    requestAnimationFrame(() => {
+      dialog.current?.showModal();
+      if (next === "search") search.current?.focus();
+    });
   };
   useEffect(() => {
     const keyboard = (event: KeyboardEvent) => {

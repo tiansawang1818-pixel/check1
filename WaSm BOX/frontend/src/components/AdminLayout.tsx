@@ -1,3 +1,5 @@
+import { CanvasArtwork } from "./CanvasArtwork";
+import { AtelierRoom } from "./AtelierRoom";
 import { type ReactNode, useState } from "react";
 import { Link, Navigate, NavLink, Outlet } from "react-router-dom";
 import {
@@ -101,8 +103,9 @@ export function AdminLayout() {
             </span>
           </header>
           <main className="main">
-            <Outlet />
-          </main>
+            <AtelierRoom><Outlet /></AtelierRoom>
+          <CanvasArtwork />
+            </main>
           <footer className="app-footer">
             WasmBot Admin<span>การเปลี่ยนแปลงถูกบันทึกเพื่อตรวจสอบย้อนหลัง</span>
           </footer>

@@ -1,0 +1,218 @@
+/* A sketchbook workspace. Texture stays outside fields and reading surfaces. */
+:root,.user-shell,.admin-shell,.public-layout { --canvas:#f1eee6; --surface:#fffdf7; --soft:#eae5d9; --ink:#383830; --accent:#383830; --line:#d8d2c4; --muted:#706e63; }
+body { background:#f1eee6; color:#383830; }
+.user-shell { background-color:var(--canvas); background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='%236e6553' opacity='.045' filter='url(%23n)' d='M0 0h180v180H0z'/%3E%3C/svg%3E"); }
+.user-shell .sidebar { background:#e9e4d9; border-right:1px solid #d1cabc; }
+.user-shell .topbar { background:#f7f4eccf; border-bottom:1px solid var(--line); }
+.brand { letter-spacing:-.04em; }
+.brand-mark { border-radius:6px 11px 7px 10px; }
+.workspace { background:#f5f1e7; box-shadow:none; border-radius:4px; }
+.sidebar nav a { border-radius:4px; min-height:46px; }
+.sidebar nav a.active { background:#fdfaf1; box-shadow:inset 3px 0 var(--ink); }
+.sidebar .sandbox-note { background:transparent; border-style:dashed; border-radius:4px; }
+.user-shell .main { max-width:1500px; padding:34px 42px; }
+.user-shell .studio-hero { border:1px solid var(--line); border-radius:4px; padding:34px 36px; gap:28px; background:var(--surface); box-shadow:3px 3px 0 #e4ded1,4px 4px 0 #d2cabc; grid-template-columns:1.05fr 1fr; }
+.studio-hero-copy { align-self:center; }
+.atelier-edition { display:block; color:var(--muted); font-size:10px; letter-spacing:.16em; border-bottom:1px solid var(--line); padding-bottom:16px; margin-bottom:24px; }
+.studio-hero h1 { font-family:Georgia,"Thonburi",serif; font-size:clamp(1.9rem,3vw,3rem); line-height:1.5; letter-spacing:-.025em; font-weight:500; margin:12px 0 20px; }
+.hero-greeting { font-size:13px; }
+.hero-description { font-size:14px; line-height:1.9; }
+.primary,.hero-actions .primary { border-radius:5px; box-shadow:2px 3px 0 #b8b09c; padding:12px 18px; }
+.primary:hover { box-shadow:1px 1px 0 #b8b09c; opacity:1; }
+.secondary,input,textarea,select,.command-launch { border-radius:5px; }
+.circuit-visual { background:transparent; border:0; border-radius:0; }
+.circuit-caption { padding:0 0 8px; border-bottom:1px solid var(--line); }
+.atelier-sketch { display:block; width:100%; height:210px; object-fit:cover; mix-blend-mode:multiply; margin:12px 0 0; }
+.circuit-stage { height:105px; aspect-ratio:auto; background:none; }
+.circuit-lines { position:absolute; inset:0; }
+.circuit-core { width:48px; height:48px; border-radius:6px; box-shadow:0 0 0 4px var(--surface); }
+.circuit-core svg { width:22px; height:22px; }.circuit-core span { font-size:6px; }
+.circuit-label { top:38%; background:var(--surface); }
+.circuit-footer { background:transparent; padding:5px 0 0; }
+.circuit-footer button { width:44px; height:44px; border-radius:4px; }
+.user-shell .metric,.user-shell .panel,.user-shell .bot-card,.getting-started,.builder,.builder-steps { border-radius:5px; box-shadow:0 3px 8px #40351e04; }
+.user-shell .metric::after { display:none; }
+.metric strong { font-family:Georgia,serif; font-weight:400; }
+.section-heading { border-bottom:1px solid var(--line); padding-bottom:12px; }
+.section-heading h2,.panel-heading h2,.getting-started h2 { font-weight:500; }
+.getting-started { background:#ece7dc; border-style:dashed; }
+.user-shell .bot-icon { background:var(--soft); color:var(--ink); border-radius:6px; }
+.user-shell table th { background:#efebe1; }
+.user-shell .bot-card:hover { border-color:#9e9581; box-shadow:3px 4px 0 #e3ddcf; }
+.builder-starters { border:1px dashed #bfb6a2; border-radius:5px; }
+.builder .rule-card,.builder .field-card,.builder .default-rule { border-radius:5px; }
+.condition-group { min-width:0; margin:16px 0; padding:16px; border:1px solid var(--line); border-radius:5px; background:var(--surface); }
+.condition-group legend { font-size:12px; padding:0 8px; color:var(--muted); }
+.group-mode { display:flex; gap:12px; align-items:center; flex-wrap:wrap; font-size:13px; margin-bottom:16px; }
+.group-mode select { max-width:280px; }
+.group-connector { display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:12px; color:var(--muted); }
+.nested-group { border-left:2px solid #b9b09a; margin:16px 0; padding-left:14px; }
+.group-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+.group-actions small { flex-basis:100%; line-height:1.7; }
+.nested-group .condition { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.auth-main { background:#f1eee6; }.auth-art { background:#383830; }
+.auth-card { background:#fffdf7; border-radius:6px; box-shadow:4px 5px 0 #ded6c5; }
+.user-shell[data-studio-theme=dark] { --canvas:#24241f; --surface:#2e2e28; --soft:#39392f; --line:#4b4a3f; --muted:#bcb8aa; --ink:#f0ecdf; --accent:#f0ecdf; }
+.user-shell[data-studio-theme=dark] :is(.sidebar,.topbar,.workspace,.studio-hero,.getting-started,.builder-starters) { background:var(--surface); border-color:var(--line); }
+.user-shell[data-studio-theme=dark] .sidebar nav a.active,.user-shell[data-studio-theme=dark] table th { background:var(--soft); }
+.user-shell[data-studio-theme=dark] .atelier-sketch { mix-blend-mode:normal; opacity:.8; border-radius:3px; }
+@media(max-width:1100px) { .user-shell .main { padding:28px; }.user-shell .studio-hero { padding:26px; }.atelier-sketch { height:180px; } }
+@media(max-width:900px) { .user-shell .studio-hero { grid-template-columns:1fr; }.circuit-visual { max-width:560px; }.atelier-sketch { height:240px; } }
+@media(max-width:640px) { .user-shell .main { padding:22px 16px; }.user-shell .studio-hero { padding:24px 18px; gap:24px; }.studio-hero h1 { font-size:1.9rem; }.atelier-edition { font-size:9px; }.atelier-sketch { height:180px; }.condition-group { padding:10px; }.nested-group { padding-left:7px; }.condition,.nested-group .condition { grid-template-columns:1fr; }.group-mode select { max-width:100%; width:100%; }.group-actions .secondary { width:100%; } }
+/* The visual language is the artwork: etched lines, margins and numbered studies. */
+.sketchbook-page { display:flex; align-items:center; justify-content:space-between; gap:24px; min-height:150px; margin:0 0 30px; padding:4px 22px 16px; border-bottom:1px solid var(--line); position:relative; }
+.sketchbook-page::after { content:""; position:absolute; bottom:-4px; left:0; width:72px; border-bottom:1px solid var(--muted); transform:rotate(-2deg); }
+.sketchbook-index { font-size:10px; letter-spacing:.18em; color:var(--muted); }
+.sketchbook-title { font-family:Georgia,"Thonburi",serif; font-size:25px; margin:12px 0 6px; color:var(--ink); }
+.sketchbook-description { font-size:13px; color:var(--muted); line-height:1.8; margin:0; }
+.pencil-study { display:block; width:210px; height:148px; color:var(--ink); flex-shrink:0; opacity:.7; }
+.hero-pencil { display:grid; place-items:center; padding-top:16px; }
+.hero-pencil .pencil-study { width:100%; max-width:360px; height:220px; opacity:.85; }
+.circuit-caption { border-bottom-style:dashed; }.circuit-visual { border-left:1px solid var(--line); padding-left:24px; }
+.panel,.bot-card,.metric,.builder,.public-card,.auth-card { position:relative; }
+.panel::after,.bot-card::after,.public-card::after { content:""; position:absolute; right:8px; top:8px; width:24px; height:12px; opacity:.22; background:repeating-linear-gradient(135deg,transparent 0 3px,var(--muted) 3px 4px); pointer-events:none; }
+.panel,.bot-card,.metric,.public-card { border-color:var(--line); border-radius:3px; }
+.page-heading h1,.auth-card h1,.public-card h1 { font-family:Georgia,"Thonburi",serif; font-weight:500; letter-spacing:-.02em; }
+.tabs { border-bottom:1px solid var(--line); gap:8px; }
+.tabs a,.tabs button { border-radius:4px 4px 0 0; }
+.tabs a.active,.tabs button.active { background:var(--soft); border-bottom:2px solid var(--ink); }
+.builder-steps { background:var(--surface); border-style:dashed; }
+.builder-steps button.selected { border-radius:4px; }
+.auth-art { background:#e6e0d1; color:#383830; background-image:repeating-linear-gradient(118deg,transparent 0 24px,#6d644408 24px 25px); border-right:1px solid #cfc6b2; }
+.auth-art :is(.brand,h1,p,.auth-foot) { color:#383830; }
+.auth-art .eyebrow { color:#686353; opacity:1; }
+.auth-art .flow-visual > * { background:#f6f1e5; color:#383830; border-color:#cfc6b2; }
+.auth-card .sketchbook-page { padding:0 0 14px; min-height:100px; gap:12px; margin-bottom:24px; }
+.auth-card .sketchbook-title { display:none; }.auth-card .sketchbook-description { font-size:12px; margin-top:10px; }
+.auth-card .pencil-study { width:112px; height:100px; }
+.admin-shell { background:var(--canvas); }.admin-shell .sidebar { background:#e9e4d9; border-right:1px solid var(--line); }
+.admin-shell .sidebar :is(.brand,.admin-workspace,.admin-workspace h2,.text-link) { color:var(--ink); }
+.admin-shell .admin-workspace { background:transparent; border:1px dashed var(--line); border-radius:3px; }
+.admin-shell .sidebar nav a.active { background:var(--surface); color:var(--ink); }
+.admin-shell .panel,.admin-shell .metric,.admin-shell .notice { background:var(--surface); border-color:var(--line); }
+.public-layout:not(.embedded) { background:var(--canvas); background-image:repeating-linear-gradient(100deg,transparent 0 100px,#786e5005 100px 101px); }
+.public-card { background:var(--surface); box-shadow:4px 5px 0 var(--soft); }
+.public-card .sketchbook-page { padding:0 0 12px; min-height:110px; margin-bottom:24px; }.public-card .pencil-study { width:145px; height:110px; }
+.embedded .sketchbook-page { min-height:70px; gap:10px; margin-bottom:16px; }.embedded .sketchbook-title { font-size:17px; }.embedded .sketchbook-description { display:none; }.embedded .pencil-study { width:85px; height:65px; }
+.setup .sketchbook-page { text-align:left; }
+@media(max-width:640px) { .sketchbook-page { padding:0 0 14px; gap:10px; min-height:110px; margin-bottom:24px; }.sketchbook-title { font-size:20px; }.sketchbook-index { font-size:8px; letter-spacing:.1em; }.sketchbook-description { font-size:12px; }.sketchbook-page .pencil-study { width:98px; height:100px; }.circuit-visual { border-left:0; border-top:1px dashed var(--line); padding:20px 0 0; }.hero-pencil .pencil-study { height:160px; }.public-card .pencil-study { width:90px; }.auth-card .sketchbook-page { gap:8px; }.auth-card .pencil-study { width:80px; } }
+
+/* Artist's sheet: the drawing belongs to the paper, not a separate picture card. */
+:root,.user-shell,.admin-shell,.public-layout { --canvas:#e7e0d2; --surface:#faf5e9; --soft:#eee6d6; --line:#bcb29e; --ink:#37342e; --muted:#686054; }
+.user-shell .main,.admin-shell .main { background-color:#f7f0e2; background-image:linear-gradient(#faf5e940,#faf5e940),url('/images/artist-paper.png'); background-size:100% auto; background-repeat:no-repeat; background-position:right top; margin:24px; padding:36px; box-shadow:0 3px 18px #342b1920,inset 0 0 40px #bca77a18; border:1px solid #cfc3aa; min-height:calc(100vh - 120px); }
+.user-shell .studio-hero { background:transparent; border:0; box-shadow:none; padding:20px 0 38px; min-height:490px; grid-template-columns:1.2fr 1fr; }
+.studio-hero-copy { align-self:start; padding-top:12px; }
+.studio-hero h1 { font-size:clamp(2rem,3.4vw,3.2rem); line-height:1.45; text-shadow:.35px .2px currentColor; }
+.atelier-edition { max-width:360px; border-bottom:1px solid #786b50; }
+.hero-description { max-width:420px; }
+.hero-pencil { visibility:hidden; height:220px; }
+.circuit-visual { border:0; padding:0; align-self:end; }
+.circuit-caption { display:none; }
+.circuit-stage,.circuit-footer { background:#faf5e9e8; border-radius:0; }
+.circuit-stage { border-top:1px solid #9c8b6b; }
+.circuit-footer { padding:8px 10px; }
+.sketchbook-page { min-height:235px; padding:12px 0 28px; margin-bottom:32px; align-items:flex-start; border-bottom:1px solid #8d8069; }
+.sketchbook-page > div { max-width:62%; padding:12px 16px 12px 0; }
+.sketchbook-page > .pencil-study { display:none; }
+.sketchbook-title { font-size:30px; line-height:1.5; }
+.user-shell .panel,.user-shell .bot-card,.user-shell .metric,.admin-shell .panel,.admin-shell .metric,.builder { background:#faf6edee; border:1px solid #bdb3a0; border-radius:2px 5px 3px 7px; box-shadow:2px 3px 0 #b6a88b20; }
+.page-heading { background:#f8f2e6eb; padding:18px 20px; border-left:2px solid #6e624e; }
+.user-shell .sidebar,.admin-shell .sidebar { background-color:#e8e0d0; background-image:repeating-linear-gradient(94deg,transparent 0 4px,#76634704 5px 6px); }
+.sidebar nav a.active { outline:1px solid #94866c; outline-offset:-4px; border-radius:3px 8px 5px 2px; }
+.auth-art { background:#f7f0e2 url('/images/artist-paper.png') right bottom / auto 100% no-repeat; }
+.auth-art > div:not(.auth-foot) { background:#faf5e9de; padding:24px; }
+.auth-card,.public-card { background-color:#faf5e9; background-image:linear-gradient(#faf5e930,#faf5e930),url('/images/artist-paper.png'); background-size:100% auto; background-repeat:no-repeat; border:1px solid #c7b99e; border-radius:2px 6px 3px 2px; box-shadow:5px 6px 0 #b6a88b38,0 10px 35px #51422613; }
+.auth-card .sketchbook-page,.public-card .sketchbook-page { min-height:150px; }
+.auth-card .sketchbook-page > div,.public-card .sketchbook-page > div { max-width:65%; }
+.auth-card .sketchbook-description { color:#514b40; }
+input,textarea,select { background-color:#fffdf6; border-color:#b8ac96; }
+.user-shell[data-studio-theme=dark] .main { background-color:#24241f; background-image:none; }
+.user-shell[data-studio-theme=dark] :is(.panel,.bot-card,.metric,.builder,.page-heading,.circuit-stage,.circuit-footer) { background:var(--surface); }
+.user-shell[data-studio-theme=dark] .hero-pencil { visibility:visible; }
+@media(max-width:900px) { .user-shell .studio-hero { grid-template-columns:1fr; }.user-shell .main,.admin-shell .main { margin:12px; padding:24px; }.studio-hero-copy { max-width:75%; }.hero-pencil { height:60px; }.circuit-visual { width:100%; }.sketchbook-page { min-height:180px; } }
+@media(max-width:640px) { .user-shell .main,.admin-shell .main { margin:8px; padding:18px 14px; background-size:auto 420px; background-position:60% top; background-image:linear-gradient(90deg,#faf5e9ee 0%,#faf5e9c9 55%,#faf5e930),url('/images/artist-paper.png'); }.user-shell .studio-hero { padding:0 0 22px; min-height:0; gap:14px; }.studio-hero-copy { max-width:100%; }.studio-hero h1 { font-size:2rem; }.hero-pencil { display:none; }.circuit-visual { padding:12px 0 0; border:0; }.sketchbook-page { min-height:190px; }.sketchbook-page > div { max-width:85%; }.sketchbook-title { font-size:26px; }.page-heading { padding:14px; }.auth-card .sketchbook-page,.public-card .sketchbook-page { min-height:150px; }.public-card .sketchbook-title { font-size:22px; } }
+.user-shell .main,.admin-shell .main { width:calc(100% - 48px); min-width:0; }
+@media(max-width:900px) { .user-shell .main,.admin-shell .main { width:calc(100% - 24px); } }
+@media(max-width:640px) { .user-shell .main,.admin-shell .main { width:calc(100% - 16px); } }
+
+/* Marginalia and working notes give the sheet a lived-in rhythm. */
+.user-shell .studio-hero { min-height:0; padding:0 0 24px; gap:22px; }
+.studio-hero h1 { margin:10px 0 14px; font-size:clamp(1.9rem,3vw,2.8rem); }
+.atelier-edition { margin-bottom:18px; padding-bottom:12px; }
+.atelier-note { display:flex; align-items:center; gap:12px; margin:20px 0 16px; color:var(--muted); transform:rotate(-1deg); }
+.atelier-note > span { font:38px Georgia,serif; }
+.atelier-note p { margin:0; font-size:14px; line-height:1.7; }
+.atelier-note small { font-size:11px; }
+.paper-shortcuts { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:20px; }
+.paper-shortcuts a { display:flex; flex-direction:column; gap:8px; text-decoration:none; color:var(--ink); padding:16px 12px; background:#faf5e9ed; border:1px solid #a99a7e; border-radius:2px 6px 3px 2px; position:relative; box-shadow:2px 3px 0 #71634715; }
+.paper-shortcuts a::before { content:""; position:absolute; top:-5px; left:20px; width:38px; height:10px; background:#d9cbaa99; transform:rotate(-4deg); }
+.paper-shortcuts a > span { font-size:8px; letter-spacing:.16em; color:var(--muted); }
+.paper-shortcuts strong { font-size:13px; font-weight:600; }.paper-shortcuts small { font-size:11px; color:var(--muted); line-height:1.6; }
+.paper-shortcuts a:hover { background:#fffaf0; border-color:var(--ink); }.paper-shortcuts a:focus-visible { outline:2px solid var(--ink); outline-offset:4px; }
+.user-shell .main,.admin-shell .main { background-image:linear-gradient(#faf5e925,#faf5e925),url('/images/artist-paper.png'),repeating-linear-gradient(0deg,transparent 0 31px,#89795c0b 31px 32px); }
+.user-shell .section-heading { margin-top:18px; }
+.sketchbook-page { min-height:175px; margin-bottom:20px; }
+.sketchbook-page::before { content:"✳  ·  ·  ·  /  WASMBOT STUDIO"; position:absolute; bottom:9px; right:0; font:9px Georgia,serif; letter-spacing:.2em; color:#74664f; }
+.user-shell .panel,.admin-shell .panel { border-top:2px solid #9c8d71; }
+.user-shell .metric { background-image:repeating-linear-gradient(130deg,transparent 0 5px,#82745906 5px 6px); }
+.user-shell[data-studio-theme=dark] .paper-shortcuts a { background:var(--surface); border-color:var(--line); }
+.user-shell[data-studio-theme=dark] .main { background-image:none; }
+@media(max-width:640px) { .user-shell .main,.admin-shell .main { background-image:linear-gradient(90deg,#faf5e9f5 0%,#faf5e9df 55%,#faf5e970),url('/images/artist-paper.png'); }.paper-shortcuts { gap:8px; }.paper-shortcuts a { padding:14px 10px; }.paper-shortcuts strong { font-size:12px; }.atelier-note { margin:16px 0; }.sketchbook-page { min-height:165px; }.sketchbook-page::before { font-size:7px; }.studio-hero h1 { font-size:1.9rem; } }
+
+/* Carry the illustrated sheet through the entire workspace, including short pages. */
+.user-shell .main,.admin-shell .main { background-image:linear-gradient(#faf5e925,#faf5e925),url('/images/artist-paper.png'),repeating-linear-gradient(0deg,transparent 0 27px,#89795c12 27px 28px); background-size:100% auto,100% auto,100% 100%; }
+.user-shell .metrics { gap:12px; margin-bottom:18px; }
+.user-shell .metric { padding:18px; border-bottom:3px double #ab9b7e; }
+.dashboard-workspace-grid { gap:16px; margin:18px 0; }
+.user-shell .panel { margin-bottom:18px; padding:20px; background-image:linear-gradient(110deg,#faf6ed 65%,#faf6edd9),url('/images/artist-paper.png'); background-size:cover; background-position:right bottom; }
+.user-shell .bot-grid { grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; }
+.user-shell .bot-card { background-image:linear-gradient(90deg,#faf6edf5,#faf6edc9),url('/images/artist-paper.png'); background-size:auto 100%; background-position:right; border-bottom:3px double #a99a7e; }
+.user-shell .bot-card .description { min-height:0; margin-bottom:18px; }
+.user-shell .empty { padding:28px 20px; border:1px dashed #b4a78e; background:repeating-linear-gradient(0deg,#faf5e9cc 0 26px,#b4a78e22 26px 27px); }
+.getting-started { background-image:linear-gradient(#eee6d6df,#eee6d6df),url('/images/artist-paper.png'); background-size:cover; border:1px solid #ab9b7e; }
+.user-shell[data-studio-theme=dark] :is(.panel,.bot-card,.getting-started,.empty,.shelf-study) { background:var(--surface); border-color:var(--line); }
+.user-shell[data-studio-theme=dark] .main { background-image:none; }
+
+/* One illustration per page; cards remain working paper rather than repeated artwork. */
+.user-shell .main,.admin-shell .main { background-image:repeating-linear-gradient(0deg,transparent 0 27px,#89795c0b 27px 28px); background-size:auto; }
+.user-shell .main:has(.studio-hero) { background-image:linear-gradient(#faf5e925,#faf5e925),url('/images/artist-paper.png'),repeating-linear-gradient(0deg,transparent 0 27px,#89795c0b 27px 28px); background-size:100% auto,100% auto,100% 100%; }
+.user-shell .panel,.user-shell .bot-card,.getting-started { background-image:none; }
+.user-shell .panel { background-color:#faf6edf2; }
+.user-shell .bot-card { background-color:#f8f2e6; }
+.getting-started { background-color:#eee6d6; }
+.sketchbook-page > .pencil-study { display:block; width:250px; height:175px; opacity:.8; }
+.sketchbook-page > div { max-width:65%; }
+.auth-card,.public-card { background-image:none; }
+.auth-card .sketchbook-page > .pencil-study { display:none; }
+.public-card .sketchbook-page > .pencil-study { width:145px; height:110px; }
+.user-shell[data-studio-theme=dark] .main:has(.studio-hero) { background-image:none; }
+.user-shell[data-studio-theme=dark] :is(.panel,.bot-card,.getting-started) { background-color:var(--surface); }
+@media(max-width:640px) { .user-shell .bot-grid { grid-template-columns:1fr; }.user-shell .panel { padding:16px; }.user-shell .main:has(.studio-hero) { background-image:linear-gradient(90deg,#faf5e9f5 0%,#faf5e9df 55%,#faf5e970),url('/images/artist-paper.png'); background-size:auto 420px; }.sketchbook-page > .pencil-study { width:95px; height:120px; }.sketchbook-page > div { max-width:70%; }.public-card .sketchbook-page > .pencil-study { width:85px; }.user-shell[data-studio-theme=dark] .main:has(.studio-hero) { background-image:none; } }
+
+/* Content first: a single compact masthead, then usable work immediately. */
+.user-shell .main,.admin-shell .main { padding:22px 26px; margin:16px; width:calc(100% - 32px); min-height:0; }
+.user-shell .sketchbook-page,.admin-shell .sketchbook-page { min-height:0; height:88px; padding:0 0 10px; margin-bottom:14px; align-items:center; }
+.user-shell .sketchbook-page > div,.admin-shell .sketchbook-page > div { padding:0; max-width:75%; }
+.user-shell .sketchbook-title,.admin-shell .sketchbook-title { font-size:17px; margin:5px 0 0; }
+.user-shell .sketchbook-description,.admin-shell .sketchbook-description { display:none; }
+.user-shell .sketchbook-page > .pencil-study,.admin-shell .sketchbook-page > .pencil-study { width:125px; height:86px; }
+.sketchbook-page::before { display:none; }
+.user-shell .page-heading,.admin-shell .page-heading { margin:0 0 16px; padding:12px 16px; gap:12px; }
+.page-heading h1 { font-size:1.65rem; margin:0 0 6px; }.page-heading .eyebrow { display:none; }
+.page-heading p { font-size:13px; line-height:1.6; margin-top:0; }
+.user-shell .search { margin:0 0 16px; max-width:none; width:100%; }
+.user-shell .bot-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-bottom:18px; }
+.user-shell .bot-card { padding:18px; }.user-shell .bot-card h3 { margin:12px 0 8px; }
+.new-bot-sheet { display:flex; flex-direction:column; align-items:flex-start; min-width:0; padding:18px; border:1px dashed #98886c; color:var(--ink); text-decoration:none; background:repeating-linear-gradient(0deg,#eee6d670 0 25px,#9b8b6f19 25px 26px); }
+.new-bot-mark { display:grid; place-items:center; width:42px; height:42px; border:1px solid #9e9076; border-radius:50% 46% 52% 43%; margin-bottom:12px; }
+.new-bot-sheet .section-overline { font-size:10px; }.new-bot-sheet strong { font-size:17px; margin:8px 0; font-weight:500; }.new-bot-sheet p { font-size:12px; line-height:1.8; color:var(--muted); margin:0 0 16px; }
+.new-bot-action { display:flex; gap:8px; align-items:center; margin-top:auto; font-size:13px; border-bottom:1px solid #9b8b6f; padding-bottom:5px; }
+.new-bot-sheet:hover { border-style:solid; background-color:var(--surface); }.new-bot-sheet:focus-visible { outline:2px solid var(--ink); outline-offset:3px; }
+.user-shell .studio-hero { grid-template-columns:1.35fr 1fr; gap:20px; padding-bottom:16px; }
+.studio-hero h1 { font-size:clamp(1.7rem,2.5vw,2.4rem); line-height:1.35; margin:8px 0 12px; }.hero-greeting { margin:8px 0; }.atelier-edition { margin-bottom:10px; padding-bottom:8px; }.hero-description { line-height:1.7; margin:10px 0; }.hero-actions { margin-top:14px; }.atelier-note { display:none; }.paper-shortcuts { margin-top:16px; }.paper-shortcuts a { padding:12px; }
+.hero-pencil { height:120px; }.circuit-stage { height:90px; }.circuit-visual { align-self:center; }
+.user-shell .section-heading { margin:14px 0 12px; padding-bottom:8px; }.section-heading h2 { font-size:18px; }
+.user-shell .metric { padding:14px 16px; }.metric strong { font-size:1.65rem; margin:8px 0; }
+.user-shell .main:has(.studio-hero) { background-size:100% 520px,100% auto,100% 100%; }
+@media(max-width:1100px) { .user-shell .bot-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }.user-shell .studio-hero { grid-template-columns:1fr 0.8fr; } }
+@media(max-width:640px) { .user-shell .main,.admin-shell .main { margin:8px; width:calc(100% - 16px); padding:14px; }.user-shell .bot-grid { grid-template-columns:1fr; }.user-shell .studio-hero { grid-template-columns:1fr; }.user-shell .sketchbook-page,.admin-shell .sketchbook-page { height:70px; }.user-shell .sketchbook-page > .pencil-study,.admin-shell .sketchbook-page > .pencil-study { width:80px; height:68px; }.sketchbook-index { font-size:8px; }.user-shell .sketchbook-title,.admin-shell .sketchbook-title { font-size:15px; }.page-heading h1 { font-size:1.4rem; }.paper-shortcuts { margin-top:12px; }.user-shell .main:has(.studio-hero) { background-size:auto 420px; } }

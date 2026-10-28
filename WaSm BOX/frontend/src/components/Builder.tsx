@@ -2,6 +2,9 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, Code2, Plus, Save, Trash2 } from "lucide-react";
 import {
   type BotDraft,
+  type ConditionGroup,
+  groupConditions,
+  MAX_GROUP_DEPTH,
   BotSchema,
   type Field,
   fieldTypes,
@@ -472,7 +475,7 @@ export function Builder(
                     className="danger-text"
                     disabled={fields.length === 1 ||
                       rules.some((r) =>
-                        r.conditions.some((c) => c.field === f.name)
+                        groupConditions(r).some((c) => c.field === f.name)
                       )}
                     aria-label={`ลบช่อง ${f.label}`}
                     onClick={() =>
@@ -483,7 +486,7 @@ export function Builder(
                     <Trash2 size={16} />ลบช่องนี้
                   </button>
                   {rules.some((r) =>
-                    r.conditions.some((c) => c.field === f.name)
+                    groupConditions(r).some((c) => c.field === f.name)
                   ) && (
                     <small>
                       ช่องนี้ใช้ในเงื่อนไขอยู่ หากต้องการลบ
@@ -556,22 +559,6 @@ export function Builder(
                           <strong>
                             ข้อ {i + 1} · {i === 0 ? "ถ้า" : "ถ้าข้อก่อนหน้าไม่ตรง"}
                           </strong>
-                          <label className="inline">
-                            เมื่อ<select
-                              value={rule.match}
-                              onChange={(e) => {
-                                const r = structuredClone(rules);
-                                r[i].match = e.target.value as "AND" | "OR";
-                                change("rule_definition", {
-                                  ...draft.rule_definition,
-                                  rules: r,
-                                });
-                              }}
-                            >
-                              <option value="AND">ตรงทุกเงื่อนไข</option>
-                              <option value="OR">ตรงอย่างน้อยหนึ่งเงื่อนไข</option>
-                            </select>
-                          </label>
                           <button
                             className="icon-button danger-text"
                             aria-label={`ลบข้อ ${i + 1}`}
@@ -584,107 +571,11 @@ export function Builder(
                             <Trash2 size={16} />
                           </button>
                         </div>
-                        {rule.conditions.map((cond, j) => (
-                          <div className="condition" key={j}>
-                            <label>
-                              เลือกข้อมูล<select
-                                value={cond.field}
-                                onChange={(e) => {
-                                  const r = structuredClone(rules);
-                                  r[i].conditions[j].field = e.target.value;
-                                  r[i].conditions[j].value = emptyValue(
-                                    fields.find((f) =>
-                                      f.name === e.target.value
-                                    )?.type || "text",
-                                  );
-                                  change("rule_definition", {
-                                    ...draft.rule_definition,
-                                    rules: r,
-                                  });
-                                }}
-                              >
-                                {fields.map((f) => (
-                                  <option value={f.name} key={f.name}>
-                                    {f.label}
-                                  </option>
-                                ))}
-                              </select>
-                            </label>
-                            <label>
-                              เงื่อนไข<select
-                                value={cond.operator}
-                                onChange={(e) => {
-                                  const r = structuredClone(rules);
-                                  r[i].conditions[j].operator = e.target
-                                    .value as typeof cond.operator;
-                                  change("rule_definition", {
-                                    ...draft.rule_definition,
-                                    rules: r,
-                                  });
-                                }}
-                              >
-                                {operators.map((o) => (
-                                  <option value={o} key={o}>
-                                    {operatorLabels[o]}
-                                  </option>
-                                ))}
-                              </select>
-                            </label>
-                            {!["is_empty", "is_not_empty"].includes(
-                              cond.operator,
-                            ) && (
-                              <ValueInput
-                                type={fields.find((f) => f.name === cond.field)
-                                  ?.type}
-                                options={fields.find((f) =>
-                                  f.name === cond.field
-                                )?.options}
-                                value={cond.value ?? ""}
-                                onChange={(v) => {
-                                  const r = structuredClone(rules);
-                                  r[i].conditions[j].value = v;
-                                  change("rule_definition", {
-                                    ...draft.rule_definition,
-                                    rules: r,
-                                  });
-                                }}
-                              />
-                            )}
-                            <button
-                              className="icon-button"
-                              disabled={rule.conditions.length === 1}
-                              aria-label="ลบเงื่อนไข"
-                              onClick={() => {
-                                const r = structuredClone(rules);
-                                r[i].conditions.splice(j, 1);
-                                change("rule_definition", {
-                                  ...draft.rule_definition,
-                                  rules: r,
-                                });
-                              }}
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
-                        ))}
-                        <button
-                          className="text-link"
-                          disabled={rule.conditions.length >= 20}
-                          onClick={() => {
-                            const r = structuredClone(rules);
-                            r[i].conditions.push({
-                              field: fields[0]?.name || "",
-                              operator: "==",
-                              value: "",
-                            });
-                            change("rule_definition", {
-                              ...draft.rule_definition,
-                              rules: r,
-                            });
-                          }}
-                        >
-                          + เพิ่มเงื่อนไขในข้อนี้
-                        </button>
+                        <GroupEditor group={rule} fields={fields} depth={0} onChange={group => {
+                          const next = [...rules];
+                          next[i] = { ...group, output: rule.output };
+                          change("rule_definition", { ...draft.rule_definition, rules: next });
+                        }} />
                         <div className="return-row">
                           <span>ให้บอทตอบ</span>
                           <ValueInput
@@ -823,4 +714,46 @@ export function Builder(
       </div>
     </>
   );
+}
+
+function GroupEditor({group, fields, depth, onChange}: {
+  group: ConditionGroup; fields: Field[]; depth: number; onChange: (group: ConditionGroup) => void;
+}) {
+  const groups = group.groups ?? [];
+  const update = (index: number, patch: Partial<ConditionGroup["conditions"][number]>) =>
+    onChange({...group, conditions: group.conditions.map((condition, i) => i === index ? {...condition, ...patch} : condition)});
+  const first = fields[0];
+  const fresh = () => ({field: first?.name ?? "", operator: "==" as const, value: emptyValue(first?.type ?? "text")});
+  return <fieldset className="condition-group">
+    <legend>{depth ? `กลุ่มย่อย · ชั้น ${depth}` : "เงื่อนไขของข้อนี้"}</legend>
+    <label className="group-mode">ให้กลุ่มนี้ผ่านเมื่อ
+      <select value={group.match} onChange={event => onChange({...group, match:event.target.value as "AND" | "OR"})}>
+        <option value="AND">ตรงทุกข้อ (AND)</option><option value="OR">ตรงอย่างน้อยหนึ่งข้อ (OR)</option>
+      </select>
+    </label>
+    {group.conditions.map((condition, index) => {
+      const field = fields.find(item => item.name === condition.field);
+      return <div className="condition" key={index}>
+        <label>เลือกข้อมูล<select value={condition.field} onChange={event => update(index, {field:event.target.value,value:emptyValue(fields.find(item => item.name === event.target.value)?.type ?? "text")})}>
+          {fields.map(item => <option key={item.name} value={item.name}>{item.label}</option>)}
+        </select></label>
+        <label>เงื่อนไข<select value={condition.operator} onChange={event => update(index,{operator:event.target.value as typeof condition.operator})}>
+          {operators.map(operator => <option key={operator} value={operator}>{operatorLabels[operator]}</option>)}
+        </select></label>
+        {!["is_empty","is_not_empty"].includes(condition.operator) && <ValueInput type={field?.type} options={field?.options} value={condition.value ?? ""} onChange={value => update(index,{value})} />}
+        <button type="button" className="icon-button" aria-label="ลบเงื่อนไข" disabled={group.conditions.length + groups.length <= 1} onClick={() => onChange({...group, conditions:group.conditions.filter((_, i) => i !== index)})}><Trash2 size={16}/></button>
+      </div>;
+    })}
+    {groups.map((child, index) => <div className="nested-group" key={index}>
+      <div className="group-connector">{group.match === "AND" ? "และ" : "หรือ"} · กลุ่ม {index + 1}
+        <button type="button" className="danger-text" disabled={group.conditions.length + groups.length <= 1} aria-label={`ลบกลุ่ม ${index + 1} ชั้น ${depth + 1}`} onClick={() => onChange({...group,groups:groups.filter((_, i) => i !== index)})}><Trash2 size={14}/> ลบกลุ่ม</button>
+      </div>
+      <GroupEditor group={child} fields={fields} depth={depth + 1} onChange={value => onChange({...group, groups:groups.map((item,i) => i === index ? value : item)})}/>
+    </div>)}
+    <div className="group-actions">
+      <button type="button" className="secondary" disabled={group.conditions.length >= 20} onClick={() => onChange({...group,conditions:[...group.conditions,fresh()]})}>+ เพิ่มเงื่อนไข</button>
+      <button type="button" className="secondary" disabled={depth >= MAX_GROUP_DEPTH || groups.length >= 20} onClick={() => onChange({...group,groups:[...groups,{match:group.match === "AND" ? "OR" : "AND", conditions:[fresh()]}]})}>+ เพิ่มกลุ่ม AND / OR</button>
+      {depth === 0 && <small>เงื่อนไขและกลุ่มย่อยใช้ตัวเชื่อมด้านบนร่วมกัน · ซ้อนได้ 4 ชั้น รวมไม่เกิน 100 เงื่อนไขต่อข้อ</small>}
+    </div>
+  </fieldset>;
 }

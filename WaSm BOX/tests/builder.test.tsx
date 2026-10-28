@@ -78,3 +78,14 @@ it("keeps incomplete JSON visible and prevents saving it", async () => {
   );
   expect(save).not.toHaveBeenCalled();
 });
+it("adds a nested OR group and preserves it when saving", async () => {
+  const save=vi.fn().mockResolvedValue(undefined);
+  render(<Builder onSave={save}/>);
+  rules();
+  fireEvent.click(screen.getAllByRole("button",{name:"+ เพิ่มกลุ่ม AND / OR"})[0]);
+  expect(screen.getByText("กลุ่มย่อย · ชั้น 1")).toBeTruthy();
+  fireEvent.click(screen.getByRole("button",{name:"บันทึกบอท"}));
+  await waitFor(()=>expect(save).toHaveBeenCalledTimes(1));
+  expect(save.mock.calls[0][0].rule_definition.rules[0].groups[0].match).toBe("OR");
+  expect(save.mock.calls[0][0].rule_definition.rules[0].groups[0].conditions[0].value).toBe(0);
+});
