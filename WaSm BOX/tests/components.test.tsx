@@ -33,7 +33,9 @@ it("shows execution failure and recovers loading state", async () => {
     screen.getByRole("button", { name: "รันบอท" }).closest("form")!,
   );
   await waitFor(() =>
-    expect(screen.getByRole("alert").textContent).toContain("Bot disabled")
+    expect(screen.getByRole("alert").textContent).toContain(
+      "บอทนี้ถูกปิดใช้งานชั่วคราว",
+    )
   );
   expect(screen.getByRole("button").hasAttribute("disabled")).toBe(false);
 });

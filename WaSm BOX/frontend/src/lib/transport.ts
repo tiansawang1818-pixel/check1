@@ -5,6 +5,29 @@ export class ApiError extends Error {
   }
 }
 
+const apiErrorMessages: Record<string, string> = {
+  UNAUTHORIZED: "กรุณาเข้าสู่ระบบก่อนใช้งาน",
+  FORBIDDEN: "บัญชีนี้ไม่มีสิทธิ์ดำเนินการ",
+  BOT_NOT_FOUND: "ไม่พบบอทนี้ หรือบอทถูกลบแล้ว",
+  BOT_NOT_PUBLISHED: "บอทนี้ยังไม่ได้เผยแพร่",
+  BOT_DISABLED: "บอทนี้ถูกปิดใช้งานชั่วคราว",
+  BOT_BLOCKED: "บอทนี้ถูกระงับการใช้งาน",
+  INVALID_API_KEY: "กุญแจ API ไม่ถูกต้อง",
+  API_KEY_REVOKED: "กุญแจ API นี้ถูกยกเลิกแล้ว",
+  API_DISABLED: "การใช้งานผ่าน API ถูกปิดไว้",
+  RATE_LIMITED: "มีคำขอมากเกินไป กรุณารอสักครู่แล้วลองใหม่",
+  LIMIT_REACHED: "บัญชีนี้ใช้งานถึงขีดจำกัดแล้ว",
+  PAYLOAD_TOO_LARGE: "ข้อมูลมีขนาดใหญ่เกินไป",
+  OUTPUT_TOO_LARGE: "ผลลัพธ์มีขนาดใหญ่เกินไป กรุณาลดข้อมูลที่ส่งกลับ",
+  VALIDATION_ERROR: "ข้อมูลไม่ถูกต้อง กรุณาตรวจข้อมูลแล้วลองใหม่",
+  WASM_ERROR: "บอทประมวลผลไม่สำเร็จ กรุณาตรวจเงื่อนไขแล้วลองใหม่",
+  CONFIGURATION_ERROR: "ระบบยังตั้งค่าไม่ครบ กรุณาติดต่อผู้ดูแล",
+  DATABASE_ERROR: "ระบบจัดเก็บข้อมูลขัดข้อง กรุณาลองใหม่",
+  INTERNAL_ERROR: "ระบบขัดข้องชั่วคราว กรุณาลองใหม่",
+  METHOD_NOT_ALLOWED: "วิธีเรียกบริการนี้ไม่ถูกต้อง",
+  NOT_FOUND: "ไม่พบบริการหรือข้อมูลที่ขอ",
+};
+
 /** Cancel obsolete reads and bound network waits without retrying writes. */
 export async function requestJson<T>(
   url: string,
@@ -30,8 +53,14 @@ export async function requestJson<T>(
       throw new ApiError("เซิร์ฟเวอร์ตอบกลับไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง", response.status);
     }
     if (!response.ok || result?.success !== true) {
-      const message = typeof result?.error?.message === "string"
+      const code = typeof result?.error?.code === "string"
+        ? result.error.code
+        : "";
+      const serverMessage = typeof result?.error?.message === "string"
         ? result.error.message
+        : "";
+      const message = apiErrorMessages[code] || (/[ก-๙]/.test(serverMessage)
+        ? serverMessage
         : response.status === 404
         ? "ไม่พบบริการหรือข้อมูลที่ขอ หากเพิ่งติดตั้งระบบ ให้ตรวจการ deploy Edge Functions"
         : response.status === 401
@@ -40,7 +69,7 @@ export async function requestJson<T>(
         ? "บัญชีนี้ไม่มีสิทธิ์ดำเนินการ"
         : response.status === 429
         ? "มีคำขอมากเกินไป กรุณารอสักครู่แล้วลองใหม่"
-        : `ไม่สามารถดำเนินการได้ (${response.status}) กรุณาลองใหม่`;
+        : `ไม่สามารถดำเนินการได้ (${response.status}) กรุณาลองใหม่`);
       throw new ApiError(message, response.status);
     }
     return result as T;

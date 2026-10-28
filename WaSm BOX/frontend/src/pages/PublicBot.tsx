@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { Flag, Layers3 } from "lucide-react";
 import { api } from "../lib/api";
+import { friendlyError } from "../lib/errors";
 import { BotForm, Output } from "../components/BotForm";
 import { Badge, ErrorBox, Loading } from "../components/ui";
 import { useAction } from "../lib/context";
@@ -59,7 +60,7 @@ function PublicBotPage() {
     ).then((d) => {
       if (current) setBot(d.bot);
     }).catch((e) => {
-      if (current) setError(e instanceof Error ? e.message : "โหลดบอทไม่สำเร็จ กรุณาลองใหม่");
+      if (current) setError(friendlyError(e, "โหลดบอทไม่สำเร็จ กรุณาลองใหม่"));
     });
     return () => {
       current = false;
@@ -149,6 +150,7 @@ function PublicBotPage() {
                   className="powered"
                   to="/"
                   target={embed ? "_blank" : undefined}
+                  rel={embed ? "noreferrer" : undefined}
                 >
                   <Layers3 size={15} />Powered by WasmBot Studio
                 </Link>

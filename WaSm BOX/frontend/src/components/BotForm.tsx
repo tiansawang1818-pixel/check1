@@ -3,6 +3,7 @@ import { Play } from "lucide-react";
 import type { Field } from "../../../supabase/functions/_shared/schema";
 import { validateInput } from "../../../supabase/functions/_shared/schema";
 import { ErrorBox, Json } from "./ui";
+import { friendlyError } from "../lib/errors";
 export function BotForm(
   { fields, onRun, buttonText = "รันบอท", placeholder = "" }: {
     fields: Field[];
@@ -46,7 +47,7 @@ export function BotForm(
           validateInput({ fields }, input);
           await onRun(input);
         } catch (e) {
-          setError(e instanceof Error ? e.message : "รันบอทไม่สำเร็จ กรุณาลองใหม่");
+          setError(friendlyError(e, "รันบอทไม่สำเร็จ กรุณาลองใหม่"));
         } finally {
           inFlight.current = false;
           setBusy(false);

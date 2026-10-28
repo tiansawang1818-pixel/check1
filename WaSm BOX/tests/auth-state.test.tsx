@@ -34,5 +34,5 @@ it("does not restore an old admin profile after signing out during a read", asyn
 it("stops loading when reading the session rejects", async () => {
   mocks.getSession.mockRejectedValue(new Error("Session unavailable"));
   render(<AuthProvider><State /></AuthProvider>);
-  await waitFor(() => expect(screen.getByText(/Session unavailable/).textContent).toContain('"loading":false'));
+  await waitFor(() => expect(screen.getByText(/โหลดข้อมูลบัญชีไม่สำเร็จ/).textContent).toContain('"loading":false'));
 });

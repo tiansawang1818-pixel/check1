@@ -9,6 +9,7 @@ import {
 } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { api, supabase } from "./api";
+import { friendlyError } from "./errors";
 type Profile = {
   id: string;
   username: string;
@@ -59,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       if (request === generation.current) {
-        setError(error instanceof Error ? error.message : "โหลดข้อมูลบัญชีไม่สำเร็จ กรุณาลองใหม่");
+        setError(friendlyError(error, "โหลดข้อมูลบัญชีไม่สำเร็จ กรุณาลองใหม่"));
       }
     } finally {
       if (request === generation.current) setLoading(false);
@@ -141,7 +142,7 @@ export function useAction() {
       await fn();
       if (message) notify(message);
     } catch (e) {
-      notify(e instanceof Error ? e.message : "ดำเนินการไม่สำเร็จ กรุณาลองใหม่", true);
+      notify(friendlyError(e), true);
     } finally {
       inFlight.current = false;
       setBusy(false);
@@ -169,7 +170,7 @@ export function useResource<T = any>(path: string | null) {
     void api<T>(path, "GET", undefined, undefined, { signal: controller.signal }).then((d) => {
       if (alive) setData(d);
     }).catch((e) => {
-      if (alive) setError(e.message);
+      if (alive) setError(friendlyError(e, "โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่"));
     }).finally(() => {
       if (alive) setLoading(false);
     });

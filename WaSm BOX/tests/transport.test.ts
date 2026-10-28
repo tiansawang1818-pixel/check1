@@ -11,6 +11,24 @@ describe("API transport", () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ code: "NOT_FOUND" }), { status: 404 })));
     await expect(requestJson("/test", {})).rejects.toThrow("Edge Functions");
   });
+  it("translates a known server error code without exposing its English message", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      success: false,
+      error: { code: "BOT_DISABLED", message: "Bot disabled" },
+    }), { status: 403 })));
+    await expect(requestJson("/test", {})).rejects.toThrow(
+      "บอทนี้ถูกปิดใช้งานชั่วคราว",
+    );
+  });
+  it("gives a useful Thai message when the WASM runtime rejects execution", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      success: false,
+      error: { code: "WASM_ERROR", message: "Execution failed" },
+    }), { status: 422 })));
+    await expect(requestJson("/test", {})).rejects.toThrow(
+      "บอทประมวลผลไม่สำเร็จ",
+    );
+  });
   it("handles HTML proxy responses", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("<html>error</html>", { status: 502 })));
     await expect(requestJson("/test", {})).rejects.toThrow("เซิร์ฟเวอร์ตอบกลับไม่ถูกต้อง");
