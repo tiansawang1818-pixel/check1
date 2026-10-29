@@ -18,6 +18,43 @@ type Profile = {
   status: string;
   avatar_url?: string;
 };
+const AUTH_READ_TIMEOUT_MS = 12_000;
+
+class SessionCheckTimeoutError extends Error {
+  constructor() {
+    super("Session check timed out");
+    this.name = "SessionCheckTimeoutError";
+  }
+}
+
+async function within<T>(
+  value: PromiseLike<T>,
+  timeoutMs: number,
+  timeoutError: () => Error,
+): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      Promise.resolve(value),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(timeoutError()), timeoutMs);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function isExpiredSession(error: unknown) {
+  if (error instanceof SessionCheckTimeoutError) return true;
+  const status = typeof error === "object" && error !== null && "status" in error
+    ? Number((error as { status?: unknown }).status)
+    : 0;
+  const message = error instanceof Error ? error.message : String(error || "");
+  return status === 401 ||
+    /auth session missing|invalid refresh token|refresh token.*not found|session.*expired|jwt expired/i
+      .test(message);
+}
 const AuthContext = createContext<
   {
     session: Session | null;
@@ -46,21 +83,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError("");
     try {
       if (!supabase) return;
-      const { data: { session }, error } = await supabase.auth.getSession();
+      const { data: { session }, error } = await within(
+        supabase.auth.getSession(),
+        AUTH_READ_TIMEOUT_MS,
+        () => new SessionCheckTimeoutError(),
+      );
       if (request !== generation.current) return;
       if (error) throw error;
       setSession(session);
       if (session) {
-        const { data, error } = await supabase.from("profiles").select("*").eq(
-          "id", session.user.id,
-        ).single();
+        const { data, error } = await within(
+          supabase.from("profiles").select("*").eq(
+            "id",
+            session.user.id,
+          ).single(),
+          AUTH_READ_TIMEOUT_MS,
+          () => new Error("Profile read timed out"),
+        );
         if (request !== generation.current) return;
         if (error) throw error;
         setProfile(data);
       }
     } catch (error) {
       if (request === generation.current) {
-        setError(friendlyError(error, "โหลดข้อมูลบัญชีไม่สำเร็จ กรุณาลองใหม่"));
+        if (isExpiredSession(error)) {
+          setSession(null);
+          setProfile(null);
+          setError("");
+          void supabase?.auth.signOut({ scope: "local" });
+        } else {
+          setError(friendlyError(error, "โหลดข้อมูลบัญชีไม่สำเร็จ กรุณาลองใหม่"));
+        }
       }
     } finally {
       if (request === generation.current) setLoading(false);
