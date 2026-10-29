@@ -7,7 +7,7 @@
     "dev": "vite --config frontend/vite.config.ts",
     "typecheck": "tsc --noEmit && tsc -p sdk/tsconfig.json --noEmit",
     "lint": "eslint frontend/src sdk/src supabase/functions/_shared tests && deno lint supabase/functions --ignore=supabase/functions/wasm-runtime",
-    "build": "pnpm typecheck && vite build --config frontend/vite.config.ts && pnpm build:sdk",
+    "build": "pnpm typecheck && vite build --config frontend/vite.config.ts && node scripts/verify-build.mjs && pnpm build:sdk",
     "build:sdk": "tsc -p sdk/tsconfig.json",
     "build:wasm": "node scripts/build-wasm.mjs",
     "test": "vitest run",
