@@ -14,7 +14,7 @@ import { Loading } from "./components/ui";
 import { AdminLayout } from "./components/AdminLayout";
 import {
   claimStaleAssetReload,
-  clearStaleAssetReload,
+  currentBuildId,
 } from "./lib/chunkReload";
 const Bots = lazy(() =>
   import("./pages/Dashboard").then((module) => ({ default: module.Bots }))
@@ -58,22 +58,18 @@ function page(content: ReactNode) {
 class ErrorBoundary
   extends Component<{ children: ReactNode }, { error: boolean }> {
   state = { error: false };
-  private clearReloadTimer?: number;
   static getDerivedStateFromError() {
     return { error: true };
   }
-  componentDidMount() {
-    this.clearReloadTimer = window.setTimeout(
-      () => clearStaleAssetReload(sessionStorage),
-      10_000,
-    );
-  }
-  componentWillUnmount() {
-    if (this.clearReloadTimer) window.clearTimeout(this.clearReloadTimer);
-  }
   componentDidCatch(error: Error, info: ErrorInfo) {
     try {
-      if (claimStaleAssetReload(error, sessionStorage)) {
+      if (
+        claimStaleAssetReload(
+          error,
+          sessionStorage,
+          currentBuildId(document),
+        )
+      ) {
         location.reload();
         return;
       }

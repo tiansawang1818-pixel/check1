@@ -1,7 +1,6 @@
 import { expect, it } from "vitest";
 import {
   claimStaleAssetReload,
-  clearStaleAssetReload,
   isStaleAssetError,
 } from "../frontend/src/lib/chunkReload";
 
@@ -26,8 +25,7 @@ it("recognizes stale lazy-loaded assets without matching ordinary errors", () =>
 it("claims one automatic reload and prevents a reload loop", () => {
   const storage = memoryStorage();
   const error = new Error("Importing a module script failed");
-  expect(claimStaleAssetReload(error, storage, 100_000)).toBe(true);
-  expect(claimStaleAssetReload(error, storage, 100_001)).toBe(false);
-  clearStaleAssetReload(storage);
-  expect(claimStaleAssetReload(error, storage, 100_002)).toBe(true);
+  expect(claimStaleAssetReload(error, storage, "build-a")).toBe(true);
+  expect(claimStaleAssetReload(error, storage, "build-a")).toBe(false);
+  expect(claimStaleAssetReload(error, storage, "build-b")).toBe(true);
 });
