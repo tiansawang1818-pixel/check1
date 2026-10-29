@@ -12,6 +12,10 @@ import { AuthPage, Setup } from "./pages/Auth";
 import { Layout } from "./components/Layout";
 import { Loading } from "./components/ui";
 import { AdminLayout } from "./components/AdminLayout";
+import {
+  claimStaleAssetReload,
+  clearStaleAssetReload,
+} from "./lib/chunkReload";
 const Bots = lazy(() =>
   import("./pages/Dashboard").then((module) => ({ default: module.Bots }))
 );
@@ -54,10 +58,28 @@ function page(content: ReactNode) {
 class ErrorBoundary
   extends Component<{ children: ReactNode }, { error: boolean }> {
   state = { error: false };
+  private clearReloadTimer?: number;
   static getDerivedStateFromError() {
     return { error: true };
   }
+  componentDidMount() {
+    this.clearReloadTimer = window.setTimeout(
+      () => clearStaleAssetReload(sessionStorage),
+      10_000,
+    );
+  }
+  componentWillUnmount() {
+    if (this.clearReloadTimer) window.clearTimeout(this.clearReloadTimer);
+  }
   componentDidCatch(error: Error, info: ErrorInfo) {
+    try {
+      if (claimStaleAssetReload(error, sessionStorage)) {
+        location.reload();
+        return;
+      }
+    } catch {
+      // Some privacy modes can block session storage. Keep the manual recovery UI.
+    }
     console.error(error, info.componentStack);
   }
   render() {
