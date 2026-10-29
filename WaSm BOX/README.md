@@ -2,7 +2,7 @@
 
 แพลตฟอร์มสร้าง Business Logic Bot ด้วย React + Supabase Auth/PostgreSQL/Edge Functions และ **Rust WebAssembly จริง** ไม่มี Node backend server, Railway, Render หรือ VPS เป็นส่วนประกอบของระบบ
 
-> สถานะ: มีการสร้าง Supabase project และตั้งค่าบัญชีแล้ว และผ่าน hosted integration 13 ขั้นตอนแล้ว แต่ยังไม่ได้ตรวจอีเมลสมัครสมาชิกและการใช้งานผ่านเบราว์เซอร์ครบทุกขั้นตอน ตรวจสถานะล่าสุดใน [DEVELOPMENT_STATUS.md](DEVELOPMENT_STATUS.md) และผลแยกตามวันที่ใน [VERIFICATION.md](VERIFICATION.md)
+> **Production:** [wasmbot-studio.vercel.app](https://wasmbot-studio.vercel.app) — ระบบหลักผ่านการทดสอบอัตโนมัติ 71 รายการ รวมถึงการตรวจ production, authentication, authorization, Edge Functions และ security headers แล้ว รายละเอียดเชิงเทคนิคอยู่ใน [DEVELOPMENT_STATUS.md](DEVELOPMENT_STATUS.md) และ [VERIFICATION.md](VERIFICATION.md)
 
 ## Features
 
