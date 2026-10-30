@@ -2,6 +2,7 @@
 // This entry point is separate from the production application.
 import { createRoot } from "react-dom/client";
 import { useState } from "react";
+import { MemoryRouter } from "react-router-dom";
 import {
   ArrowRight,
   Bot,
@@ -20,6 +21,7 @@ import "./atelier.css";
 import "./gallery.css";
 import "./manuscript.css";
 import "./atelier-room.css";
+import "./release-polish.css";
 
 import { StudioTools } from "./components/StudioTools";
 import { GettingStarted, StudioWelcome } from "./components/StudioWelcome";
@@ -425,8 +427,10 @@ function Preview() {
 }
 const previewRoot = createRoot(document.getElementById("root")!);
 previewRoot.render(
-  <ToastProvider>
-    <Preview />
-  </ToastProvider>,
+  <MemoryRouter>
+    <ToastProvider>
+      <Preview />
+    </ToastProvider>
+  </MemoryRouter>,
 );
 if (import.meta.hot) import.meta.hot.dispose(() => previewRoot.unmount());

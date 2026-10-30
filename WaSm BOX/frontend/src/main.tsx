@@ -7,6 +7,7 @@ import "./atelier.css";
 import "./gallery.css";
 import "./manuscript.css";
 import "./atelier-room.css";
+import "./release-polish.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
